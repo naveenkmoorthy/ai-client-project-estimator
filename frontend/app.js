@@ -4,9 +4,12 @@ const defaultSubmitLabel = submitButton ? submitButton.textContent : 'Generate d
 const errorEl = document.getElementById('error');
 const resultsEl = document.getElementById('results');
 const resultsHeadingEl = resultsEl?.querySelector('h2');
+const exportPdfButton = document.getElementById('exportPdf');
+const exportDocxButton = document.getElementById('exportDocx');
 const progressPercentEl = document.getElementById('progressPercent');
 const sectionProgressEls = Array.from(document.querySelectorAll('[data-section]'));
 let latestPayload = null;
+let latestEstimateData = null;
 
 const fieldSectionMap = {
   projectDescription: 'scope',
@@ -570,7 +573,100 @@ function renderRiskFlags(risks) {
   return container;
 }
 
+function getProposalContent(data) {
+  return (typeof data?.proposalMarkdown === 'string' && data.proposalMarkdown.trim())
+    || (typeof data?.proposalPlainText === 'string' && data.proposalPlainText.trim())
+    || (typeof data?.proposalDraft === 'string' && data.proposalDraft.trim())
+    || 'No proposal draft generated yet.';
+}
+
+function setExportButtonsState({
+  disabled = false,
+  loadingFormat = null
+} = {}) {
+  const controls = [
+    { button: exportPdfButton, label: 'Export PDF', format: 'pdf' },
+    { button: exportDocxButton, label: 'Export DOCX', format: 'docx' }
+  ];
+
+  controls.forEach(({ button, label, format }) => {
+    if (!button) {
+      return;
+    }
+
+    const isLoading = loadingFormat === format;
+    button.disabled = disabled;
+    button.textContent = isLoading ? `Exporting ${format.toUpperCase()}…` : label;
+    button.setAttribute('aria-busy', isLoading ? 'true' : 'false');
+  });
+}
+
+function getExportFileName(response, format) {
+  const contentDisposition = response.headers.get('content-disposition') || '';
+  const filenameMatch = contentDisposition.match(/filename\*?=(?:UTF-8''|\")?([^\";]+)/i);
+
+  if (filenameMatch?.[1]) {
+    return decodeURIComponent(filenameMatch[1].replace(/"/g, '')).trim();
+  }
+
+  const timestamp = new Date().toISOString().slice(0, 10);
+  return `project-estimate-${timestamp}.${format}`;
+}
+
+async function exportEstimate(format) {
+  if (!latestEstimateData) {
+    ensureResultsBanner('loading', 'Generate a draft before exporting your proposal.');
+    return;
+  }
+
+  const proposalContent = getProposalContent(latestEstimateData);
+  const exportPayload = {
+    ...latestEstimateData,
+    proposalContent,
+    proposalDraft: proposalContent
+  };
+
+  setExportButtonsState({ disabled: true, loadingFormat: format });
+  ensureResultsBanner('loading', `Preparing your ${format.toUpperCase()} export…`);
+
+  try {
+    const response = await fetch(`http://localhost:3001/export/${format}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(exportPayload)
+    });
+
+    if (!response.ok) {
+      let message = `Export failed (${response.status}).`;
+      try {
+        const payload = await response.json();
+        message = payload.message || message;
+      } catch {
+        // Ignore parsing failure and keep fallback message.
+      }
+      throw new Error(message);
+    }
+
+    const fileBlob = await response.blob();
+    const fileUrl = URL.createObjectURL(fileBlob);
+    const downloadLink = document.createElement('a');
+    downloadLink.href = fileUrl;
+    downloadLink.download = getExportFileName(response, format);
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    downloadLink.remove();
+    URL.revokeObjectURL(fileUrl);
+
+    ensureResultsBanner('success', `${format.toUpperCase()} export is ready. Your download has started.`);
+  } catch (error) {
+    ensureResultsBanner('error', `Could not export ${format.toUpperCase()}: ${error.message}`);
+  } finally {
+    setExportButtonsState({ disabled: false });
+  }
+}
+
 function renderEstimate(data) {
+  latestEstimateData = data;
   const totalCost = formatCurrency(Number(data.costEstimate?.total), data.costEstimate?.currency || 'USD');
   const riskLevel = summarizeRiskLevel(data.riskFlags);
   const effortHours = calculateEffortHours(data.taskBreakdown);
@@ -591,11 +687,7 @@ function renderEstimate(data) {
   outputFields.costEstimate.appendChild(renderCostEstimate(data.costEstimate));
   outputFields.riskFlags.appendChild(renderRiskFlags(data.riskFlags));
 
-  const proposalContent =
-    (typeof data.proposalMarkdown === 'string' && data.proposalMarkdown.trim())
-    || (typeof data.proposalPlainText === 'string' && data.proposalPlainText.trim())
-    || (typeof data.proposalDraft === 'string' && data.proposalDraft.trim())
-    || 'No proposal draft generated yet.';
+  const proposalContent = getProposalContent(data);
 
   outputFields.proposalDraft.innerHTML = decorateProposalDraft(proposalContent);
   outputFields.rawJson.textContent = JSON.stringify(data, null, 2);
@@ -709,6 +801,15 @@ Object.keys(fieldSectionMap).forEach((fieldId) => {
 });
 
 updateProgressIndicator();
+setExportButtonsState({ disabled: true });
+
+exportPdfButton?.addEventListener('click', () => {
+  exportEstimate('pdf');
+});
+
+exportDocxButton?.addEventListener('click', () => {
+  exportEstimate('docx');
+});
 
 function showRequestFailure(message) {
   errorEl.textContent = `Could not generate the draft: ${message} `;
@@ -759,6 +860,7 @@ form.addEventListener('submit', async (event) => {
     submitButton.disabled = true;
     submitButton.textContent = 'Generating draft…';
   }
+  setExportButtonsState({ disabled: true });
 
   renderLoadingState();
 
@@ -775,6 +877,7 @@ form.addEventListener('submit', async (event) => {
     }
 
     renderEstimate(data);
+    setExportButtonsState({ disabled: false });
   } catch (error) {
     showRequestFailure(error.message);
     resultsEl.classList.add('hidden');
@@ -783,5 +886,6 @@ form.addEventListener('submit', async (event) => {
       submitButton.disabled = false;
       submitButton.textContent = defaultSubmitLabel;
     }
+    setExportButtonsState({ disabled: !latestEstimateData });
   }
 });
