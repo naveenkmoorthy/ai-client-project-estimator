@@ -35,17 +35,19 @@ Fill out the form and submit. The frontend sends a `POST` request to `http://loc
 
 ## Environment Variables
 
-Set these before running the backend:
+You can manage env vars with a root `.env` file. The backend now loads this file automatically on startup.
 
 - `OPENAI_API_KEY` (or equivalent provider key, if you swap model providers).
 - `PORT` (optional, defaults to `3001`).
 
-Example:
+Use the provided `.env` / `.env.example` values as a starting point:
 
 ```bash
-export OPENAI_API_KEY="your-key"
-export PORT=3001
+OPENAI_API_KEY="your-key"
+PORT=3001
 ```
+
+Environment variables set in your shell still take precedence over `.env` values.
 
 > Note: This scaffold currently returns mock estimator output. Add provider SDK wiring and prompt logic in `backend/server.js` and templates under `shared/`.
 
