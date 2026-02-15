@@ -94,7 +94,13 @@
         </form>
 
         <section id="results" class="panel hidden">
-          <h2 class="section-heading">Delivery Plan Snapshot</h2>
+          <div class="results-header">
+            <h2 class="section-heading">Delivery Plan Snapshot</h2>
+            <div class="export-actions" role="group" aria-label="Export proposal actions">
+              <button id="exportPdf" type="button" class="export-btn">Export PDF</button>
+              <button id="exportDocx" type="button" class="export-btn">Export DOCX</button>
+            </div>
+          </div>
 
           <section class="kpi-summary" aria-label="Estimate overview KPIs">
             <div class="results-grid">

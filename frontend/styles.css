@@ -493,6 +493,49 @@ pre {
   gap: var(--space-3);
 }
 
+.results-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-3);
+}
+
+.results-header .section-heading {
+  margin: 0;
+}
+
+.export-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.export-btn {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--color-primary-600) 35%, var(--color-border-subtle));
+  background: var(--color-surface);
+  color: var(--color-primary-700);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease, opacity 180ms ease;
+}
+
+.export-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--color-primary-600);
+  box-shadow: var(--shadow-elevation-1);
+}
+
+.export-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .result-card {
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-md);
@@ -830,6 +873,12 @@ pre {
   border-color: color-mix(in srgb, var(--color-primary-500) 20%, white);
 }
 
+.results-banner--error {
+  color: var(--color-error);
+  background: var(--color-error-bg);
+  border-color: color-mix(in srgb, var(--color-error) 20%, white);
+}
+
 .skeleton-block {
   display: grid;
   gap: 0.5rem;
@@ -919,6 +968,19 @@ pre {
   .results-grid {
     grid-template-columns: 1fr;
     gap: var(--space-3);
+  }
+
+  .results-header {
+    align-items: stretch;
+  }
+
+  .export-actions {
+    width: 100%;
+  }
+
+  .export-btn {
+    flex: 1;
+    justify-content: center;
   }
 
   textarea,
