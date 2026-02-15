@@ -85,9 +85,27 @@ body {
 }
 
 .hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.hero__content {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.hero__proof {
+  display: grid;
+  gap: var(--space-2);
 }
 
 .hero-badge {
@@ -107,6 +125,76 @@ body {
   margin: 0;
   max-width: 60ch;
   color: var(--color-text-secondary);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease, background-color 180ms ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn--primary {
+  background: var(--color-primary-gradient);
+  color: var(--color-text-on-primary);
+  box-shadow: 0 10px 22px rgba(79, 70, 229, 0.32), 0 2px 6px rgba(79, 70, 229, 0.18);
+}
+
+.btn--secondary {
+  background: var(--color-surface);
+  color: var(--color-primary-600);
+  border-color: color-mix(in srgb, var(--color-primary-600) 35%, var(--color-border-subtle));
+}
+
+.stat-card,
+.testimonial-snippet {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  padding: var(--space-3);
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.stat-card__value {
+  margin: 0;
+  font-size: 1.35rem;
+  line-height: 1.2;
+  font-weight: 800;
+  color: var(--color-primary-600);
+}
+
+.stat-card__label {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.83rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+
+.testimonial-snippet p {
+  margin: 0;
+}
+
+.testimonial-snippet__meta {
+  margin-top: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
 }
 
 .hero-trust-list {
@@ -593,6 +681,23 @@ pre {
 @media (max-width: 640px) {
   body {
     padding: var(--space-4);
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .hero__content {
+    order: 1;
+  }
+
+  .hero__actions {
+    order: 2;
+  }
+
+  .hero__proof {
+    order: 3;
   }
 
   .hero-trust-list {
