@@ -165,6 +165,14 @@
     "proposalDraft": {
       "type": "string",
       "description": "Draft proposal narrative for the client."
+    },
+    "proposalMarkdown": {
+      "type": "string",
+      "description": "Final proposal generated from the markdown template."
+    },
+    "proposalPlainText": {
+      "type": "string",
+      "description": "Plain text rendering of the final proposal."
     }
   },
   "$defs": {
