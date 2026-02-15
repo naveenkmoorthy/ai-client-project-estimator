@@ -1,4 +1,5 @@
 const http = require('http');
+const { createEstimate } = require('./services/estimator');
 
 const PORT = process.env.PORT || 3001;
 
@@ -46,8 +47,10 @@ function validateEstimateInput(body) {
   if (!body.budget || typeof body.budget !== 'object') {
     errors.push('budget is required and must be an object.');
   } else {
-    if (typeof body.budget.amount !== 'number' || Number.isNaN(body.budget.amount)) {
-      errors.push('budget.amount is required and must be a number.');
+    const hasAmount = Object.prototype.hasOwnProperty.call(body.budget, 'amount');
+    const amountType = typeof body.budget.amount;
+    if (!hasAmount || (amountType !== 'number' && amountType !== 'string')) {
+      errors.push('budget.amount is required and must be a number or numeric string.');
     }
     if (!body.budget.currency || typeof body.budget.currency !== 'string') {
       errors.push('budget.currency is required and must be a string (ISO code).');
@@ -55,39 +58,10 @@ function validateEstimateInput(body) {
   }
 
   if (!body.deadline || typeof body.deadline !== 'string') {
-    errors.push('deadline is required and must be an ISO date string.');
-  } else if (Number.isNaN(Date.parse(body.deadline))) {
-    errors.push('deadline must be a valid ISO date string.');
+    errors.push('deadline is required and must be a date string.');
   }
 
   return errors;
-}
-
-function buildMockEstimate(input) {
-  const { budget } = input;
-  const subtotal = budget.amount * 0.9;
-  const contingency = budget.amount * 0.1;
-
-  return {
-    taskBreakdown: [
-      { task: 'Discovery', description: 'Clarify goals and scope.', estimatedHours: 8 },
-      { task: 'Build', description: 'Implement core features.', estimatedHours: 40 }
-    ],
-    timeline: [
-      { milestone: 'Kickoff', date: input.deadline },
-      { milestone: 'Delivery', date: input.deadline }
-    ],
-    costEstimate: {
-      subtotal,
-      contingency,
-      total: subtotal + contingency,
-      currency: budget.currency
-    },
-    riskFlags: [
-      { severity: 'medium', issue: 'Scope creep', mitigation: 'Add change-control checkpoints.' }
-    ],
-    proposalDraft: 'This is a placeholder proposal draft. Replace with model-generated content.'
-  };
 }
 
 const server = http.createServer(async (req, res) => {
@@ -105,13 +79,9 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
-      const result = buildMockEstimate(body);
+      const result = createEstimate(body);
       sendJson(res, 200, {
-        input: {
-          projectDescription: body.projectDescription,
-          budget: body.budget,
-          deadline: body.deadline
-        },
+        input: result.normalizedInput,
         ...result
       });
     } catch (error) {
