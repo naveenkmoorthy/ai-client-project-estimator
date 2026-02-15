@@ -69,3 +69,25 @@ test('malformed model output still returns a safe structured response', async ()
     await app.stop();
   }
 });
+
+test('OPTIONS /estimate responds with CORS headers for preflight', async () => {
+  const app = await startServer();
+
+  try {
+    const response = await fetch(`http://127.0.0.1:${app.port}/estimate`, {
+      method: 'OPTIONS',
+      headers: {
+        Origin: 'http://localhost:3000',
+        'Access-Control-Request-Method': 'POST',
+        'Access-Control-Request-Headers': 'Content-Type'
+      }
+    });
+
+    assert.equal(response.status, 204);
+    assert.equal(response.headers.get('access-control-allow-origin'), '*');
+    assert.match(response.headers.get('access-control-allow-methods') || '', /POST/);
+    assert.match(response.headers.get('access-control-allow-headers') || '', /Content-Type/i);
+  } finally {
+    await app.stop();
+  }
+});
