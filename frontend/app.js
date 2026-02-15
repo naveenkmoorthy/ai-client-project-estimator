@@ -3,8 +3,10 @@ const submitButton = form.querySelector('button[type="submit"]');
 const defaultSubmitLabel = submitButton ? submitButton.textContent : 'Generate Estimate';
 const errorEl = document.getElementById('error');
 const resultsEl = document.getElementById('results');
+const resultsHeadingEl = resultsEl?.querySelector('h2');
 const progressPercentEl = document.getElementById('progressPercent');
 const sectionProgressEls = Array.from(document.querySelectorAll('[data-section]'));
+let latestPayload = null;
 
 const fieldSectionMap = {
   projectDescription: 'scope',
@@ -66,11 +68,103 @@ function clearElement(element) {
   element.textContent = '';
 }
 
-function renderEmptyState(message = 'No items') {
-  const placeholder = document.createElement('p');
-  placeholder.className = 'empty-state';
-  placeholder.textContent = message;
-  return placeholder;
+function renderEmptyState({
+  title = 'Nothing to show yet.',
+  guidance = 'Submit an estimate request to populate this section.',
+  actionLabel,
+  actionTarget
+} = {}) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'empty-state';
+
+  const titleEl = document.createElement('p');
+  titleEl.className = 'empty-state__title';
+  titleEl.textContent = title;
+
+  const guidanceEl = document.createElement('p');
+  guidanceEl.className = 'empty-state__guidance';
+  guidanceEl.textContent = guidance;
+
+  wrapper.append(titleEl, guidanceEl);
+
+  if (actionLabel && actionTarget) {
+    const action = document.createElement('a');
+    action.className = 'empty-state__action';
+    action.href = actionTarget;
+    action.textContent = actionLabel;
+    wrapper.appendChild(action);
+  }
+
+  return wrapper;
+}
+
+function ensureResultsBanner(type, message) {
+  if (!resultsEl) {
+    return;
+  }
+
+  const existing = resultsEl.querySelector('.results-banner');
+  existing?.remove();
+
+  const banner = document.createElement('div');
+  banner.className = `results-banner results-banner--${type}`;
+  banner.setAttribute('role', 'status');
+  banner.textContent = message;
+
+  if (resultsHeadingEl) {
+    resultsHeadingEl.insertAdjacentElement('afterend', banner);
+  } else {
+    resultsEl.prepend(banner);
+  }
+}
+
+function showResults() {
+  resultsEl.classList.remove('hidden');
+  resultsEl.classList.remove('is-visible');
+  requestAnimationFrame(() => {
+    resultsEl.classList.add('is-visible');
+  });
+}
+
+function renderSkeletonBlock(lines = 3) {
+  const block = document.createElement('div');
+  block.className = 'skeleton-block';
+
+  for (let index = 0; index < lines; index += 1) {
+    const line = document.createElement('span');
+    line.className = 'skeleton-line';
+    if (index === lines - 1) {
+      line.classList.add('skeleton-line--short');
+    }
+    block.appendChild(line);
+  }
+
+  return block;
+}
+
+function renderLoadingState() {
+  ensureResultsBanner('loading', 'Generating your estimate… We are building tasks, timeline, cost, and risk recommendations.');
+
+  outputFields.kpiTotalCost.textContent = '…';
+  outputFields.kpiDuration.textContent = '…';
+  outputFields.kpiRisk.textContent = '…';
+  outputFields.kpiEffortHours.textContent = '…';
+  outputFields.primaryRecommendation.textContent = 'Analyzing your project details and preparing a recommendation.';
+
+  clearElement(outputFields.taskBreakdown);
+  clearElement(outputFields.timeline);
+  clearElement(outputFields.costEstimate);
+  clearElement(outputFields.riskFlags);
+  clearElement(outputFields.proposalDraft);
+  clearElement(outputFields.rawJson);
+
+  outputFields.taskBreakdown.appendChild(renderSkeletonBlock(5));
+  outputFields.timeline.appendChild(renderSkeletonBlock(4));
+  outputFields.costEstimate.appendChild(renderSkeletonBlock(4));
+  outputFields.riskFlags.appendChild(renderSkeletonBlock(4));
+  outputFields.proposalDraft.appendChild(renderSkeletonBlock(6));
+
+  showResults();
 }
 
 function formatCurrency(value, currency = 'USD') {
@@ -127,43 +221,66 @@ function renderTaskBreakdown(items) {
   const container = document.createElement('div');
 
   if (!Array.isArray(items) || items.length === 0) {
-    container.appendChild(renderEmptyState());
+    container.appendChild(renderEmptyState({
+      title: 'No scoped tasks were generated.',
+      guidance: 'Add a bit more implementation detail in your project description (features, integrations, and deliverables).',
+      actionLabel: 'Refine project scope',
+      actionTarget: '#projectDescription'
+    }));
     return container;
   }
 
-  const table = document.createElement('table');
-  table.className = 'result-table';
+  const list = document.createElement('ul');
+  list.className = 'task-breakdown-list';
 
-  const thead = document.createElement('thead');
-  const headerRow = document.createElement('tr');
-  ['Task', 'Hours', 'Dependencies'].forEach((title) => {
-    const th = document.createElement('th');
-    th.textContent = title;
-    headerRow.appendChild(th);
-  });
-  thead.appendChild(headerRow);
-
-  const tbody = document.createElement('tbody');
   items.forEach((item) => {
-    const row = document.createElement('tr');
+    const row = document.createElement('li');
+    row.className = 'task-breakdown-item';
 
-    const taskCell = document.createElement('td');
-    taskCell.textContent = item.task || item.name || 'Untitled task';
+    const title = document.createElement('h4');
+    title.className = 'task-breakdown-item__title';
+    title.textContent = item.task || item.name || 'Untitled task';
 
-    const hoursCell = document.createElement('td');
+    const meta = document.createElement('div');
+    meta.className = 'task-breakdown-item__meta';
+
     const hours = item.hours ?? item.estimatedHours;
-    hoursCell.textContent = Number.isFinite(hours) ? `${hours}` : 'N/A';
+    const hoursTag = document.createElement('span');
+    hoursTag.className = 'task-breakdown-tag';
+    hoursTag.textContent = Number.isFinite(hours) ? `${hours}h` : 'Hours N/A';
 
-    const depsCell = document.createElement('td');
+    const dependencyBlock = document.createElement('div');
+    dependencyBlock.className = 'task-breakdown-dependencies';
+
+    const dependencyLabel = document.createElement('span');
+    dependencyLabel.className = 'task-breakdown-dependencies__label';
+    dependencyLabel.textContent = 'Dependencies:';
+
     const dependencies = Array.isArray(item.dependencies) ? item.dependencies : [];
-    depsCell.textContent = dependencies.length ? dependencies.join(', ') : 'None';
+    const dependencyList = document.createElement('div');
+    dependencyList.className = 'task-breakdown-dependencies__list';
 
-    row.append(taskCell, hoursCell, depsCell);
-    tbody.appendChild(row);
+    if (dependencies.length) {
+      dependencies.forEach((dependency) => {
+        const dependencyTag = document.createElement('span');
+        dependencyTag.className = 'task-breakdown-tag task-breakdown-tag--subtle';
+        dependencyTag.textContent = dependency;
+        dependencyList.appendChild(dependencyTag);
+      });
+    } else {
+      const noneTag = document.createElement('span');
+      noneTag.className = 'task-breakdown-tag task-breakdown-tag--subtle';
+      noneTag.textContent = 'None';
+      dependencyList.appendChild(noneTag);
+    }
+
+    meta.append(hoursTag);
+    dependencyBlock.append(dependencyLabel, dependencyList);
+    row.append(title, meta, dependencyBlock);
+    list.appendChild(row);
   });
 
-  table.append(thead, tbody);
-  container.appendChild(table);
+  container.appendChild(list);
   return container;
 }
 
@@ -171,7 +288,12 @@ function renderTimeline(timeline) {
   const container = document.createElement('div');
 
   if (!Array.isArray(timeline) || timeline.length === 0) {
-    container.appendChild(renderEmptyState());
+    container.appendChild(renderEmptyState({
+      title: 'Timeline milestones are unavailable.',
+      guidance: 'Confirm the deadline and include any phase expectations to generate a richer schedule.',
+      actionLabel: 'Update deadline',
+      actionTarget: '#deadline'
+    }));
     return container;
   }
 
@@ -372,7 +494,12 @@ function renderCostEstimate(cost) {
   const container = document.createElement('div');
 
   if (!cost || typeof cost !== 'object') {
-    container.appendChild(renderEmptyState());
+    container.appendChild(renderEmptyState({
+      title: 'Cost breakdown is empty.',
+      guidance: 'Provide a valid budget amount and currency so the estimate can calculate realistic totals.',
+      actionLabel: 'Review budget inputs',
+      actionTarget: '#budgetAmount'
+    }));
     return container;
   }
 
@@ -398,7 +525,12 @@ function renderRiskFlags(risks) {
   const container = document.createElement('div');
 
   if (!Array.isArray(risks) || risks.length === 0) {
-    container.appendChild(renderEmptyState());
+    container.appendChild(renderEmptyState({
+      title: 'No explicit risks detected.',
+      guidance: 'If your project has dependencies or constraints, add them to the scope to surface risk flags.',
+      actionLabel: 'Add project constraints',
+      actionTarget: '#projectDescription'
+    }));
     return container;
   }
 
@@ -503,7 +635,8 @@ function renderEstimate(data) {
     primaryValue: `${proposalContent.split(/\s+/).filter(Boolean).length} words`
   });
 
-  resultsEl.classList.remove('hidden');
+  ensureResultsBanner('success', 'Estimate generated successfully. Review the cards below and adjust inputs to iterate.');
+  showResults();
 }
 
 
@@ -577,6 +710,19 @@ Object.keys(fieldSectionMap).forEach((fieldId) => {
 
 updateProgressIndicator();
 
+function showRequestFailure(message) {
+  errorEl.textContent = `Request failed: ${message} `;
+  const retryButton = document.createElement('button');
+  retryButton.type = 'button';
+  retryButton.className = 'error-retry-btn';
+  retryButton.textContent = 'Retry';
+  retryButton.addEventListener('click', () => {
+    form.requestSubmit();
+  });
+
+  errorEl.appendChild(retryButton);
+}
+
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   errorEl.textContent = '';
@@ -607,16 +753,20 @@ form.addEventListener('submit', async (event) => {
     return;
   }
 
+  latestPayload = payload;
+
   if (submitButton) {
     submitButton.disabled = true;
     submitButton.textContent = 'Generating…';
   }
 
+  renderLoadingState();
+
   try {
     const response = await fetch('http://localhost:3001/estimate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(latestPayload)
     });
 
     const data = await response.json();
@@ -626,7 +776,7 @@ form.addEventListener('submit', async (event) => {
 
     renderEstimate(data);
   } catch (error) {
-    errorEl.textContent = `Request failed: ${error.message}`;
+    showRequestFailure(error.message);
     resultsEl.classList.add('hidden');
   } finally {
     if (submitButton) {
