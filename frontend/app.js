@@ -613,6 +613,24 @@ function getExportFileName(response, format) {
   return `project-estimate-${timestamp}.${format}`;
 }
 
+function triggerFileDownload(fileBlob, fileName) {
+  const fileUrl = URL.createObjectURL(fileBlob);
+  const downloadLink = document.createElement('a');
+  downloadLink.href = fileUrl;
+  downloadLink.download = fileName;
+  downloadLink.style.display = 'none';
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+
+  requestAnimationFrame(() => {
+    downloadLink.remove();
+  });
+
+  setTimeout(() => {
+    URL.revokeObjectURL(fileUrl);
+  }, 1000);
+}
+
 async function exportEstimate(format) {
   if (!latestEstimateData) {
     ensureResultsBanner('loading', 'Generate a draft before exporting your proposal.');
@@ -648,14 +666,11 @@ async function exportEstimate(format) {
     }
 
     const fileBlob = await response.blob();
-    const fileUrl = URL.createObjectURL(fileBlob);
-    const downloadLink = document.createElement('a');
-    downloadLink.href = fileUrl;
-    downloadLink.download = getExportFileName(response, format);
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    downloadLink.remove();
-    URL.revokeObjectURL(fileUrl);
+    if (fileBlob.size === 0) {
+      throw new Error('The exported file was empty. Please try again.');
+    }
+
+    triggerFileDownload(fileBlob, getExportFileName(response, format));
 
     ensureResultsBanner('success', `${format.toUpperCase()} export is ready. Your download has started.`);
   } catch (error) {
