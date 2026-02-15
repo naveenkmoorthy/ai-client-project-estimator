@@ -39,26 +39,37 @@
 
       <section id="results" class="panel hidden">
         <h2>Estimate Results</h2>
-        <div>
+        <div class="results-grid">
+          <article class="result-card">
           <h3>Task Breakdown</h3>
-          <pre id="taskBreakdown"></pre>
-        </div>
-        <div>
+          <div id="taskBreakdown" class="result-content"></div>
+          </article>
+
+          <article class="result-card">
           <h3>Timeline</h3>
-          <pre id="timeline"></pre>
-        </div>
-        <div>
+          <div id="timeline" class="result-content"></div>
+          </article>
+
+          <article class="result-card">
           <h3>Cost Estimate</h3>
-          <pre id="costEstimate"></pre>
-        </div>
-        <div>
+          <div id="costEstimate" class="result-content"></div>
+          </article>
+
+          <article class="result-card">
           <h3>Risk Flags</h3>
-          <pre id="riskFlags"></pre>
-        </div>
-        <div>
+          <div id="riskFlags" class="result-content"></div>
+          </article>
+
+          <article class="result-card result-card--full">
           <h3>Proposal Draft</h3>
           <pre id="proposalDraft"></pre>
+          </article>
         </div>
+
+        <details class="debug-panel">
+          <summary>Debug: Raw JSON</summary>
+          <pre id="rawJson" class="debug-json"></pre>
+        </details>
       </section>
     </main>
 
