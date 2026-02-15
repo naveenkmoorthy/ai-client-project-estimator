@@ -1,4 +1,5 @@
 const DAY_MS = 24 * 60 * 60 * 1000;
+const { deriveEstimationSignals } = require('./rules/estimation_rules');
 
 function normalizeInput(rawInput) {
   const normalizedDescription = String(rawInput.projectDescription || '').trim();
@@ -245,62 +246,26 @@ function generateCostEstimate(taskBreakdown, budget) {
   });
 }
 
-function generateRiskFlags(taskBreakdown, timeline, budget, deadline) {
-  return runStructuredStage({
-    stageName: 'generateRiskFlags',
-    schemaReminder: 'Return JSON array of {severity: low|medium|high, issue, mitigation}.',
-    context: { taskBreakdown, timeline, budget, deadline },
-    validate: validateRiskFlags,
-    fallback: [
-      {
-        severity: 'medium',
-        issue: 'Model output was malformed for risk analysis.',
-        mitigation: 'Perform manual review and stakeholder alignment before execution.'
-      }
-    ],
-    generator: ({ context }) => {
-      const shortTimeline = context.timeline.length > 0 && context.timeline[0].date === context.deadline;
-      const tightBudget = context.budget.amount < 1000;
-      const flags = [];
-
-      if (shortTimeline) {
-        flags.push({
-          severity: 'high',
-          issue: 'Compressed schedule may impact quality.',
-          mitigation: 'Prioritize MVP features and time-box QA cycles.'
-        });
-      }
-
-      if (tightBudget) {
-        flags.push({
-          severity: 'medium',
-          issue: 'Budget may be insufficient for full scope.',
-          mitigation: 'Define phased delivery and defer lower-priority items.'
-        });
-      }
-
-      if (flags.length === 0) {
-        flags.push({
-          severity: 'low',
-          issue: 'No critical blockers identified from structured estimate.',
-          mitigation: 'Keep weekly checkpoints to catch delivery drift early.'
-        });
-      }
-
-      return flags;
-    }
-  });
-}
-
 function generateProposalDraft(allSections) {
   const tasks = allSections.taskBreakdown.map((task) => `- ${task.task}`).join('\n');
+
+  const signalsContext = [
+    `Budget status: ${allSections.estimationSignals.budgetStatus.status}.`,
+    `Deadline status: ${allSections.estimationSignals.deadlineStatus.status}.`,
+    `Required duration: ${allSections.estimationSignals.timelineModel.requiredWeeks} weeks (${allSections.estimationSignals.timelineModel.requiredDays} days).`,
+    `Detected risks: ${allSections.riskFlags.map((risk) => risk.issue).join(', ')}.`
+  ].join(' ');
+
   return [
     'Proposed Approach:',
     tasks,
     '',
     `Target delivery date: ${allSections.deadline}.`,
     `Estimated total: ${allSections.costEstimate.total} ${allSections.costEstimate.currency}.`,
-    `Key risks identified: ${allSections.riskFlags.length}.`
+    `Key risks identified: ${allSections.riskFlags.length}.`,
+    '',
+    'AI Prompt Context:',
+    signalsContext
   ].join('\n');
 }
 
@@ -309,14 +274,29 @@ function createEstimate(rawInput) {
   const taskBreakdown = generateTaskBreakdown(normalizedInput.projectDescription);
   const timeline = generateTimeline(taskBreakdown, normalizedInput.deadline);
   const costEstimate = generateCostEstimate(taskBreakdown, normalizedInput.budget);
-  const riskFlags = generateRiskFlags(taskBreakdown, timeline, normalizedInput.budget, normalizedInput.deadline);
+  const estimationSignals = deriveEstimationSignals({
+    projectDescription: normalizedInput.projectDescription,
+    taskBreakdown,
+    costEstimate,
+    budgetAmount: normalizedInput.budget.amount,
+    availableDurationDays: normalizedInput.metadata.availableDurationDays
+  });
+  const riskFlags = runStructuredStage({
+    stageName: 'validateRuleRiskFlags',
+    schemaReminder: 'Return JSON array of {severity: low|medium|high, issue, mitigation}.',
+    context: { riskFlags: estimationSignals.riskFlags },
+    validate: validateRiskFlags,
+    fallback: estimationSignals.riskFlags,
+    generator: ({ context }) => context.riskFlags
+  });
 
   const proposalDraft = generateProposalDraft({
     ...normalizedInput,
     taskBreakdown,
     timeline,
     costEstimate,
-    riskFlags
+    riskFlags,
+    estimationSignals
   });
 
   return {
@@ -325,6 +305,7 @@ function createEstimate(rawInput) {
     timeline,
     costEstimate,
     riskFlags,
+    estimationSignals,
     proposalDraft
   };
 }
@@ -334,7 +315,6 @@ module.exports = {
   generateTaskBreakdown,
   generateTimeline,
   generateCostEstimate,
-  generateRiskFlags,
   generateProposalDraft,
   createEstimate
 };

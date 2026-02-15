@@ -85,9 +85,97 @@
         "additionalProperties": false
       }
     },
+    "estimationSignals": {
+      "type": "object",
+      "required": ["sizingTiers", "taskSizing", "timelineModel", "budgetStatus", "deadlineStatus", "riskFlags"],
+      "properties": {
+        "sizingTiers": {
+          "type": "object",
+          "properties": {
+            "S": { "$ref": "#/$defs/hourRange" },
+            "M": { "$ref": "#/$defs/hourRange" },
+            "L": { "$ref": "#/$defs/hourRange" },
+            "XL": { "$ref": "#/$defs/hourRange" }
+          },
+          "additionalProperties": false
+        },
+        "taskSizing": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["task", "estimatedHours", "tier", "defaultRange"],
+            "properties": {
+              "task": { "type": "string" },
+              "estimatedHours": { "type": "number", "minimum": 0 },
+              "tier": { "type": "string", "enum": ["S", "M", "L", "XL"] },
+              "defaultRange": { "$ref": "#/$defs/hourRange" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "timelineModel": {
+          "type": "object",
+          "required": ["totalHours", "teamVelocityHoursPerWeek", "requiredWeeks", "requiredDays"],
+          "properties": {
+            "totalHours": { "type": "number", "minimum": 0 },
+            "teamVelocityHoursPerWeek": { "type": "number", "minimum": 1 },
+            "requiredWeeks": { "type": "number", "minimum": 0 },
+            "requiredDays": { "type": "number", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "budgetStatus": {
+          "type": "object",
+          "required": ["status", "utilization", "shortfall"],
+          "properties": {
+            "status": { "type": "string", "enum": ["within_budget", "at_risk", "over_budget"] },
+            "utilization": { "type": ["number", "null"], "minimum": 0 },
+            "shortfall": { "type": "number", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "deadlineStatus": {
+          "type": "object",
+          "required": ["status", "slackDays"],
+          "properties": {
+            "status": { "type": "string", "enum": ["on_track", "tight", "unrealistic"] },
+            "slackDays": { "type": "number" }
+          },
+          "additionalProperties": false
+        },
+        "riskFlags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["severity", "issue", "mitigation"],
+            "properties": {
+              "severity": {
+                "type": "string",
+                "enum": ["low", "medium", "high"]
+              },
+              "issue": { "type": "string" },
+              "mitigation": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "proposalDraft": {
       "type": "string",
       "description": "Draft proposal narrative for the client."
+    }
+  },
+  "$defs": {
+    "hourRange": {
+      "type": "object",
+      "required": ["minHours", "maxHours"],
+      "properties": {
+        "minHours": { "type": "number", "minimum": 0 },
+        "maxHours": { "type": "number" }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false
