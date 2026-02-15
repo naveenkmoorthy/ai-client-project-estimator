@@ -12,6 +12,11 @@ A minimal full-stack starter for collecting project requirements and returning a
 
 ### 1) Start the backend API
 
+Backend requirements:
+
+- Node.js 18+ (for `fetch` support used by tests).
+- No extra document-generation packages are required in this scaffold: PDF and DOCX/DOC exports are produced by `backend/services/exporter.js` using in-repo logic and Node buffers.
+
 ```bash
 cd backend
 node server.js
@@ -32,6 +37,49 @@ Then open `http://localhost:3000/frontend/`.
 ### 3) Submit an estimate request
 
 Fill out the form and submit. The frontend sends a `POST` request to `http://localhost:3001/estimate` and renders all output sections.
+
+## Exporting Results
+
+After generating a draft, open the **Delivery Plan Snapshot** results panel and use the export buttons in the top-right of that section:
+
+- **Export PDF** → downloads a PDF file.
+- **Export DOCX** → downloads a Word document (`.docx`, DOC-compatible in Microsoft Word / Google Docs).
+
+Expected download filename patterns (from `Content-Disposition`):
+
+- `project-estimate-YYYY-MM-DD.pdf`
+- `project-estimate-YYYY-MM-DD.docx`
+
+### Export API Endpoints
+
+#### `POST /export/pdf`
+
+- **Route:** `/export/pdf`
+- **Request body shape:**
+  - Accepts either:
+    - A full estimate object (generated sections such as `taskBreakdown`, `timeline`, `costEstimate`, `riskFlags`, and one of `proposalMarkdown`/`proposalPlainText`/`proposalDraft`), or
+    - Raw estimator input (`projectDescription`, `budget.amount`, `budget.currency`, `deadline`) which the backend converts into an estimate before export.
+  - Can be provided as the root JSON object or nested under `estimateData` / `estimate`.
+- **Success response:**
+  - Status: `200 OK`
+  - `Content-Type: application/pdf`
+  - `Content-Disposition: attachment; filename="project-estimate-YYYY-MM-DD.pdf"`
+- **Common error responses:**
+  - `400 ValidationError` when payload is missing required fields or has invalid types.
+  - `400 BadRequest` for malformed JSON.
+
+#### `POST /export/docx`
+
+- **Route:** `/export/docx`
+- **Request body shape:** same as `/export/pdf`.
+- **Success response:**
+  - Status: `200 OK`
+  - `Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document`
+  - `Content-Disposition: attachment; filename="project-estimate-YYYY-MM-DD.docx"`
+- **Common error responses:**
+  - `400 ValidationError` when payload is missing required fields or has invalid types.
+  - `400 BadRequest` for malformed JSON.
+  - `404 NotFound` for unsupported export routes (for example, `/export/unknown`).
 
 ## Environment Variables
 
