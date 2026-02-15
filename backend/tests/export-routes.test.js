@@ -27,6 +27,8 @@ test('POST /export/pdf returns binary payload with expected headers', async () =
     assert.equal(response.headers.get('content-type'), 'application/pdf');
     assert.match(response.headers.get('content-disposition') || '', /attachment; filename="project-estimate-\d{4}-\d{2}-\d{2}\.pdf"/);
     assert.ok(body.length > 0);
+    assert.ok(body.toString('utf8', 0, 8).startsWith('%PDF-1.4'));
+    assert.ok(body.toString('utf8').includes('xref'));
   } finally {
     await app.stop();
   }
@@ -51,6 +53,9 @@ test('POST /export/docx accepts raw estimator input and returns docx headers', a
     );
     assert.match(response.headers.get('content-disposition') || '', /attachment; filename="project-estimate-\d{4}-\d{2}-\d{2}\.docx"/);
     assert.ok(body.length > 0);
+    assert.equal(body.toString('utf8', 0, 2), 'PK');
+    assert.ok(body.includes(Buffer.from('word/document.xml')));
+    assert.ok(body.includes(Buffer.from('Project Estimate Export')));
   } finally {
     await app.stop();
   }
