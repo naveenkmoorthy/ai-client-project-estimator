@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project Estimator</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>AI Client Project Estimator</h1>
+
+      <form id="estimator-form" class="panel">
+        <label>
+          Project Description
+          <textarea id="projectDescription" required minlength="10" placeholder="Describe the project goals, scope, and key deliverables."></textarea>
+        </label>
+
+        <div class="row">
+          <label>
+            Budget Amount
+            <input id="budgetAmount" type="number" min="0" step="0.01" required />
+          </label>
+
+          <label>
+            Currency
+            <input id="budgetCurrency" type="text" minlength="3" maxlength="3" value="USD" required />
+          </label>
+
+          <label>
+            Deadline
+            <input id="deadline" type="date" required />
+          </label>
+        </div>
+
+        <button type="submit">Generate Estimate</button>
+        <p id="error" class="error" aria-live="polite"></p>
+      </form>
+
+      <section id="results" class="panel hidden">
+        <h2>Estimate Results</h2>
+        <div>
+          <h3>Task Breakdown</h3>
+          <pre id="taskBreakdown"></pre>
+        </div>
+        <div>
+          <h3>Timeline</h3>
+          <pre id="timeline"></pre>
+        </div>
+        <div>
+          <h3>Cost Estimate</h3>
+          <pre id="costEstimate"></pre>
+        </div>
+        <div>
+          <h3>Risk Flags</h3>
+          <pre id="riskFlags"></pre>
+        </div>
+        <div>
+          <h3>Proposal Draft</h3>
+          <pre id="proposalDraft"></pre>
+        </div>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/estimator-schema.json",
+  "title": "Project Estimator Contract",
+  "type": "object",
+  "required": ["projectDescription", "budget", "deadline"],
+  "properties": {
+    "projectDescription": {
+      "type": "string",
+      "minLength": 10,
+      "description": "High-level description of the client project."
+    },
+    "budget": {
+      "type": "object",
+      "required": ["amount", "currency"],
+      "properties": {
+        "amount": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Budget amount as a numeric value."
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 3,
+          "description": "ISO 4217 currency code, e.g., USD."
+        }
+      },
+      "additionalProperties": false
+    },
+    "deadline": {
+      "type": "string",
+      "format": "date",
+      "description": "Target delivery date in ISO format (YYYY-MM-DD)."
+    },
+    "taskBreakdown": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["task", "description", "estimatedHours"],
+        "properties": {
+          "task": { "type": "string" },
+          "description": { "type": "string" },
+          "estimatedHours": { "type": "number", "minimum": 0 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "timeline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["milestone", "date"],
+        "properties": {
+          "milestone": { "type": "string" },
+          "date": { "type": "string", "format": "date" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "costEstimate": {
+      "type": "object",
+      "required": ["subtotal", "contingency", "total", "currency"],
+      "properties": {
+        "subtotal": { "type": "number", "minimum": 0 },
+        "contingency": { "type": "number", "minimum": 0 },
+        "total": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "minLength": 3, "maxLength": 3 }
+      },
+      "additionalProperties": false
+    },
+    "riskFlags": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["severity", "issue", "mitigation"],
+        "properties": {
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          },
+          "issue": { "type": "string" },
+          "mitigation": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "proposalDraft": {
+      "type": "string",
+      "description": "Draft proposal narrative for the client."
+    }
+  },
+  "additionalProperties": false
+}
