@@ -29,16 +29,19 @@
             <label>
               Budget Amount
               <input id="budgetAmount" type="number" min="0" step="0.01" required />
+              <span class="field-hint">Enter your maximum project budget before taxes or contingency.</span>
             </label>
 
             <label>
               Currency
               <input id="budgetCurrency" type="text" minlength="3" maxlength="3" value="USD" required />
+              <span class="field-hint">Use a 3-letter ISO code (for example: USD, EUR, GBP).</span>
             </label>
 
             <label>
               Deadline
               <input id="deadline" type="date" required />
+              <span class="field-hint">Choose the desired launch or delivery date for the project.</span>
             </label>
           </div>
 

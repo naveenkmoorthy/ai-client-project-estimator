@@ -1,4 +1,6 @@
 const form = document.getElementById('estimator-form');
+const submitButton = form.querySelector('button[type="submit"]');
+const defaultSubmitLabel = submitButton ? submitButton.textContent : 'Generate Estimate';
 const errorEl = document.getElementById('error');
 const resultsEl = document.getElementById('results');
 
@@ -300,6 +302,11 @@ form.addEventListener('submit', async (event) => {
     return;
   }
 
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.textContent = 'Generating…';
+  }
+
   try {
     const response = await fetch('http://localhost:3001/estimate', {
       method: 'POST',
@@ -316,5 +323,10 @@ form.addEventListener('submit', async (event) => {
   } catch (error) {
     errorEl.textContent = `Request failed: ${error.message}`;
     resultsEl.classList.add('hidden');
+  } finally {
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = defaultSubmitLabel;
+    }
   }
 });
