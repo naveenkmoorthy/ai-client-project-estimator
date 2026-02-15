@@ -1,6 +1,6 @@
 const form = document.getElementById('estimator-form');
 const submitButton = form.querySelector('button[type="submit"]');
-const defaultSubmitLabel = submitButton ? submitButton.textContent : 'Generate Estimate';
+const defaultSubmitLabel = submitButton ? submitButton.textContent : 'Generate decision-ready draft';
 const errorEl = document.getElementById('error');
 const resultsEl = document.getElementById('results');
 const resultsHeadingEl = resultsEl?.querySelector('h2');
@@ -69,8 +69,8 @@ function clearElement(element) {
 }
 
 function renderEmptyState({
-  title = 'Nothing to show yet.',
-  guidance = 'Submit an estimate request to populate this section.',
+  title = 'No data yet.',
+  guidance = 'Generate a draft to populate this section.',
   actionLabel,
   actionTarget
 } = {}) {
@@ -143,13 +143,13 @@ function renderSkeletonBlock(lines = 3) {
 }
 
 function renderLoadingState() {
-  ensureResultsBanner('loading', 'Generating your estimate… We are building tasks, timeline, cost, and risk recommendations.');
+  ensureResultsBanner('loading', 'Generating your delivery draft… building scope, milestones, budget, and risk guidance.');
 
   outputFields.kpiTotalCost.textContent = '…';
   outputFields.kpiDuration.textContent = '…';
   outputFields.kpiRisk.textContent = '…';
   outputFields.kpiEffortHours.textContent = '…';
-  outputFields.primaryRecommendation.textContent = 'Analyzing your project details and preparing a recommendation.';
+  outputFields.primaryRecommendation.textContent = 'Analyzing your inputs and preparing an approval-ready recommendation.';
 
   clearElement(outputFields.taskBreakdown);
   clearElement(outputFields.timeline);
@@ -223,8 +223,8 @@ function renderTaskBreakdown(items) {
   if (!Array.isArray(items) || items.length === 0) {
     container.appendChild(renderEmptyState({
       title: 'No scoped tasks were generated.',
-      guidance: 'Add a bit more implementation detail in your project description (features, integrations, and deliverables).',
-      actionLabel: 'Refine project scope',
+      guidance: 'Add required features, integrations, and deliverables to generate a clearer scope plan.',
+      actionLabel: 'Strengthen scope input',
       actionTarget: '#projectDescription'
     }));
     return container;
@@ -290,8 +290,8 @@ function renderTimeline(timeline) {
   if (!Array.isArray(timeline) || timeline.length === 0) {
     container.appendChild(renderEmptyState({
       title: 'Timeline milestones are unavailable.',
-      guidance: 'Confirm the deadline and include any phase expectations to generate a richer schedule.',
-      actionLabel: 'Update deadline',
+      guidance: 'Confirm your target date and key phases to produce a more decision-ready schedule.',
+      actionLabel: 'Refine timeline target',
       actionTarget: '#deadline'
     }));
     return container;
@@ -466,7 +466,7 @@ function getRecommendedBudgetRange(costEstimate) {
   const minBudget = Math.max(0, total - buffer);
   const maxBudget = total + buffer;
 
-  return `Recommended budget range: ${formatCurrency(minBudget, currency)} – ${formatCurrency(maxBudget, currency)}`;
+  return `Recommended approval range: ${formatCurrency(minBudget, currency)} – ${formatCurrency(maxBudget, currency)}`;
 }
 
 function decorateProposalDraft(content) {
@@ -496,8 +496,8 @@ function renderCostEstimate(cost) {
   if (!cost || typeof cost !== 'object') {
     container.appendChild(renderEmptyState({
       title: 'Cost breakdown is empty.',
-      guidance: 'Provide a valid budget amount and currency so the estimate can calculate realistic totals.',
-      actionLabel: 'Review budget inputs',
+      guidance: 'Add a valid budget and currency so the plan can generate an approval-ready cost view.',
+      actionLabel: 'Review budget guardrails',
       actionTarget: '#budgetAmount'
     }));
     return container;
@@ -527,8 +527,8 @@ function renderRiskFlags(risks) {
   if (!Array.isArray(risks) || risks.length === 0) {
     container.appendChild(renderEmptyState({
       title: 'No explicit risks detected.',
-      guidance: 'If your project has dependencies or constraints, add them to the scope to surface risk flags.',
-      actionLabel: 'Add project constraints',
+      guidance: 'Add dependencies or constraints to surface risks before stakeholder review.',
+      actionLabel: 'Add decision risks',
       actionTarget: '#projectDescription'
     }));
     return container;
@@ -595,7 +595,7 @@ function renderEstimate(data) {
     (typeof data.proposalMarkdown === 'string' && data.proposalMarkdown.trim())
     || (typeof data.proposalPlainText === 'string' && data.proposalPlainText.trim())
     || (typeof data.proposalDraft === 'string' && data.proposalDraft.trim())
-    || 'No proposal draft generated.';
+    || 'No proposal draft generated yet.';
 
   outputFields.proposalDraft.innerHTML = decorateProposalDraft(proposalContent);
   outputFields.rawJson.textContent = JSON.stringify(data, null, 2);
@@ -617,14 +617,14 @@ function renderEstimate(data) {
   setCardMetadata('costEstimate', {
     icon: '💵',
     metaLabel: 'Budget snapshot',
-    primaryLabel: 'Total Cost',
+    primaryLabel: 'Budget Ask',
     primaryValue: formatCurrency(Number(data.costEstimate?.total), data.costEstimate?.currency || 'USD')
   });
 
   setCardMetadata('riskFlags', {
     icon: '⚠️',
     metaLabel: 'Risk outlook',
-    primaryLabel: 'Top Severity',
+    primaryLabel: 'Top Risk',
     primaryValue: summarizeRiskLevel(data.riskFlags)
   });
 
@@ -635,7 +635,7 @@ function renderEstimate(data) {
     primaryValue: `${proposalContent.split(/\s+/).filter(Boolean).length} words`
   });
 
-  ensureResultsBanner('success', 'Estimate generated successfully. Review the cards below and adjust inputs to iterate.');
+  ensureResultsBanner('success', 'Draft ready. Review the plan below, then refine inputs to tighten scope and reduce revisions.');
   showResults();
 }
 
@@ -711,11 +711,11 @@ Object.keys(fieldSectionMap).forEach((fieldId) => {
 updateProgressIndicator();
 
 function showRequestFailure(message) {
-  errorEl.textContent = `Request failed: ${message} `;
+  errorEl.textContent = `Could not generate the draft: ${message} `;
   const retryButton = document.createElement('button');
   retryButton.type = 'button';
   retryButton.className = 'error-retry-btn';
-  retryButton.textContent = 'Retry';
+  retryButton.textContent = 'Try again';
   retryButton.addEventListener('click', () => {
     form.requestSubmit();
   });
@@ -757,7 +757,7 @@ form.addEventListener('submit', async (event) => {
 
   if (submitButton) {
     submitButton.disabled = true;
-    submitButton.textContent = 'Generating…';
+    submitButton.textContent = 'Generating draft…';
   }
 
   renderLoadingState();
@@ -771,7 +771,7 @@ form.addEventListener('submit', async (event) => {
 
     const data = await response.json();
     if (!response.ok) {
-      throw new Error(data.message || 'Estimate request failed.');
+      throw new Error(data.message || 'The draft request failed.');
     }
 
     renderEstimate(data);
