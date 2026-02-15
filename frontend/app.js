@@ -7,7 +7,8 @@ const outputFields = {
   timeline: document.getElementById('timeline'),
   costEstimate: document.getElementById('costEstimate'),
   riskFlags: document.getElementById('riskFlags'),
-  proposalDraft: document.getElementById('proposalDraft')
+  proposalDraft: document.getElementById('proposalDraft'),
+  rawJson: document.getElementById('rawJson')
 };
 
 function validateFormInput(payload) {
@@ -32,12 +33,232 @@ function validateFormInput(payload) {
   return errors;
 }
 
+function clearElement(element) {
+  element.textContent = '';
+}
+
+function renderEmptyState(message = 'No items') {
+  const placeholder = document.createElement('p');
+  placeholder.className = 'empty-state';
+  placeholder.textContent = message;
+  return placeholder;
+}
+
+function formatCurrency(value, currency = 'USD') {
+  if (!Number.isFinite(value)) {
+    return 'N/A';
+  }
+
+  const normalizedCurrency = typeof currency === 'string' ? currency.toUpperCase() : 'USD';
+
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: normalizedCurrency,
+      maximumFractionDigits: 2
+    }).format(value);
+  } catch {
+    return `${normalizedCurrency} ${value.toFixed(2)}`;
+  }
+}
+
+function formatDate(value) {
+  if (!value) {
+    return 'TBD';
+  }
+
+  const parsedDate = new Date(value);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return String(value);
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  }).format(parsedDate);
+}
+
+function normalizeSeverity(severity) {
+  const key = typeof severity === 'string' ? severity.toLowerCase() : 'unknown';
+  const severityMap = {
+    low: 'Low',
+    medium: 'Medium',
+    high: 'High',
+    critical: 'Critical'
+  };
+
+  return {
+    key,
+    label: severityMap[key] || 'Unknown'
+  };
+}
+
+function renderTaskBreakdown(items) {
+  const container = document.createElement('div');
+
+  if (!Array.isArray(items) || items.length === 0) {
+    container.appendChild(renderEmptyState());
+    return container;
+  }
+
+  const table = document.createElement('table');
+  table.className = 'result-table';
+
+  const thead = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+  ['Task', 'Hours', 'Dependencies'].forEach((title) => {
+    const th = document.createElement('th');
+    th.textContent = title;
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+
+  const tbody = document.createElement('tbody');
+  items.forEach((item) => {
+    const row = document.createElement('tr');
+
+    const taskCell = document.createElement('td');
+    taskCell.textContent = item.task || item.name || 'Untitled task';
+
+    const hoursCell = document.createElement('td');
+    const hours = item.hours ?? item.estimatedHours;
+    hoursCell.textContent = Number.isFinite(hours) ? `${hours}` : 'N/A';
+
+    const depsCell = document.createElement('td');
+    const dependencies = Array.isArray(item.dependencies) ? item.dependencies : [];
+    depsCell.textContent = dependencies.length ? dependencies.join(', ') : 'None';
+
+    row.append(taskCell, hoursCell, depsCell);
+    tbody.appendChild(row);
+  });
+
+  table.append(thead, tbody);
+  container.appendChild(table);
+  return container;
+}
+
+function renderTimeline(timeline) {
+  const container = document.createElement('div');
+
+  if (!Array.isArray(timeline) || timeline.length === 0) {
+    container.appendChild(renderEmptyState());
+    return container;
+  }
+
+  const list = document.createElement('ul');
+  list.className = 'milestone-list';
+
+  timeline.forEach((milestone) => {
+    const item = document.createElement('li');
+    item.className = 'milestone-item';
+
+    const name = document.createElement('span');
+    name.className = 'milestone-name';
+    name.textContent = milestone.name || milestone.milestone || 'Untitled milestone';
+
+    const date = document.createElement('span');
+    date.className = 'milestone-date';
+    const start = milestone.startDate || milestone.start;
+    const end = milestone.endDate || milestone.end;
+    if (start || end) {
+      date.textContent = `${formatDate(start)} → ${formatDate(end)}`;
+    } else {
+      date.textContent = formatDate(milestone.date || milestone.targetDate || milestone.range);
+    }
+
+    item.append(name, date);
+    list.appendChild(item);
+  });
+
+  container.appendChild(list);
+  return container;
+}
+
+function createSummaryRow(label, value) {
+  const row = document.createElement('div');
+  row.className = 'summary-row';
+
+  const labelEl = document.createElement('span');
+  labelEl.className = 'summary-label';
+  labelEl.textContent = label;
+
+  const valueEl = document.createElement('span');
+  valueEl.className = 'summary-value';
+  valueEl.textContent = value;
+
+  row.append(labelEl, valueEl);
+  return row;
+}
+
+function renderCostEstimate(cost) {
+  const container = document.createElement('div');
+
+  if (!cost || typeof cost !== 'object') {
+    container.appendChild(renderEmptyState());
+    return container;
+  }
+
+  const summary = document.createElement('div');
+  summary.className = 'summary-list';
+  const currency = cost.currency || 'USD';
+
+  summary.append(
+    createSummaryRow('Subtotal', formatCurrency(Number(cost.subtotal), currency)),
+    createSummaryRow('Contingency', formatCurrency(Number(cost.contingency), currency)),
+    createSummaryRow('Total', formatCurrency(Number(cost.total), currency)),
+    createSummaryRow('Currency', currency)
+  );
+
+  container.appendChild(summary);
+  return container;
+}
+
+function renderRiskFlags(risks) {
+  const container = document.createElement('div');
+
+  if (!Array.isArray(risks) || risks.length === 0) {
+    container.appendChild(renderEmptyState());
+    return container;
+  }
+
+  const list = document.createElement('ul');
+  list.className = 'risk-list';
+
+  risks.forEach((risk) => {
+    const item = document.createElement('li');
+    item.className = 'risk-item';
+
+    const text = document.createElement('span');
+    text.className = 'risk-text';
+    text.textContent = risk.flag || risk.description || String(risk);
+
+    const badge = document.createElement('span');
+    const severity = normalizeSeverity(risk.severity);
+    badge.className = `risk-badge risk-badge--${severity.key}`;
+    badge.textContent = severity.label;
+
+    item.append(text, badge);
+    list.appendChild(item);
+  });
+
+  container.appendChild(list);
+  return container;
+}
+
 function renderEstimate(data) {
-  outputFields.taskBreakdown.textContent = JSON.stringify(data.taskBreakdown, null, 2);
-  outputFields.timeline.textContent = JSON.stringify(data.timeline, null, 2);
-  outputFields.costEstimate.textContent = JSON.stringify(data.costEstimate, null, 2);
-  outputFields.riskFlags.textContent = JSON.stringify(data.riskFlags, null, 2);
-  outputFields.proposalDraft.textContent = data.proposalDraft || '';
+  clearElement(outputFields.taskBreakdown);
+  clearElement(outputFields.timeline);
+  clearElement(outputFields.costEstimate);
+  clearElement(outputFields.riskFlags);
+
+  outputFields.taskBreakdown.appendChild(renderTaskBreakdown(data.taskBreakdown));
+  outputFields.timeline.appendChild(renderTimeline(data.timeline));
+  outputFields.costEstimate.appendChild(renderCostEstimate(data.costEstimate));
+  outputFields.riskFlags.appendChild(renderRiskFlags(data.riskFlags));
+  outputFields.proposalDraft.textContent = data.proposalDraft || 'No proposal draft generated.';
+  outputFields.rawJson.textContent = JSON.stringify(data, null, 2);
+
   resultsEl.classList.remove('hidden');
 }
 

@@ -57,6 +57,147 @@ pre {
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   padding: 0.75rem;
+  white-space: pre-wrap;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.result-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.75rem;
+  background: #fcfdff;
+}
+
+.result-card h3 {
+  margin-top: 0;
+}
+
+.result-card--full {
+  grid-column: 1 / -1;
+}
+
+.result-content {
+  display: block;
+}
+
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.result-table th,
+.result-table td {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: top;
+}
+
+.result-table th {
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.milestone-list,
+.risk-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.milestone-item,
+.risk-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: baseline;
+  padding: 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.milestone-name,
+.risk-text,
+.summary-label {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.milestone-date,
+.summary-value {
+  color: #4b5563;
+}
+
+.summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dashed #d1d5db;
+  padding-bottom: 0.35rem;
+}
+
+.risk-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+}
+
+.risk-badge--low {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.risk-badge--medium {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.risk-badge--high,
+.risk-badge--critical {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.risk-badge--unknown {
+  color: #374151;
+  background: #e5e7eb;
+}
+
+.empty-state {
+  color: #6b7280;
+  margin: 0;
+  font-style: italic;
+}
+
+.debug-panel {
+  margin-top: 1rem;
+}
+
+.debug-panel summary {
+  cursor: pointer;
+  color: #374151;
+  font-weight: 600;
+}
+
+.debug-json {
+  margin-top: 0.5rem;
 }
 
 .hidden {
@@ -66,4 +207,22 @@ pre {
 .error {
   color: #b91c1c;
   min-height: 1.25rem;
+}
+
+@media (max-width: 760px) {
+  body {
+    padding: 1rem;
+  }
+
+  .row,
+  .results-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .milestone-item,
+  .risk-item,
+  .summary-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
