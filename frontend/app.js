@@ -3,6 +3,15 @@ const submitButton = form.querySelector('button[type="submit"]');
 const defaultSubmitLabel = submitButton ? submitButton.textContent : 'Generate Estimate';
 const errorEl = document.getElementById('error');
 const resultsEl = document.getElementById('results');
+const progressPercentEl = document.getElementById('progressPercent');
+const sectionProgressEls = Array.from(document.querySelectorAll('[data-section]'));
+
+const fieldSectionMap = {
+  projectDescription: 'scope',
+  budgetAmount: 'budget',
+  budgetCurrency: 'budget',
+  deadline: 'timeline'
+};
 
 const outputFields = {
   taskBreakdown: document.getElementById('taskBreakdown'),
@@ -14,22 +23,35 @@ const outputFields = {
 };
 
 function validateFormInput(payload) {
-  const errors = [];
+  const errors = {
+    scope: [],
+    budget: [],
+    timeline: [],
+    fields: {}
+  };
 
   if (!payload.projectDescription || payload.projectDescription.length < 10) {
-    errors.push('Project description must be at least 10 characters.');
+    const message = 'Project description must be at least 10 characters.';
+    errors.scope.push(message);
+    errors.fields.projectDescription = message;
   }
 
   if (Number.isNaN(payload.budget.amount) || payload.budget.amount < 0) {
-    errors.push('Budget amount must be a non-negative number.');
+    const message = 'Budget amount must be a non-negative number.';
+    errors.budget.push(message);
+    errors.fields.budgetAmount = message;
   }
 
   if (!payload.budget.currency || payload.budget.currency.length !== 3) {
-    errors.push('Currency must be a 3-letter ISO code.');
+    const message = 'Currency must be a 3-letter ISO code.';
+    errors.budget.push(message);
+    errors.fields.budgetCurrency = message;
   }
 
   if (!payload.deadline) {
-    errors.push('Deadline is required.');
+    const message = 'Deadline is required.';
+    errors.timeline.push(message);
+    errors.fields.deadline = message;
   }
 
   return errors;
@@ -415,9 +437,81 @@ function renderEstimate(data) {
   resultsEl.classList.remove('hidden');
 }
 
+
+function clearFieldErrors() {
+  Object.keys(fieldSectionMap).forEach((fieldId) => {
+    const input = document.getElementById(fieldId);
+    const fieldError = document.querySelector(`[data-error-for="${fieldId}"]`);
+
+    if (input) {
+      input.classList.remove('input--error');
+      input.removeAttribute('aria-invalid');
+    }
+
+    if (fieldError) {
+      fieldError.textContent = '';
+    }
+  });
+}
+
+function applyFieldErrors(fieldErrors) {
+  Object.entries(fieldErrors).forEach(([fieldId, message]) => {
+    const input = document.getElementById(fieldId);
+    const fieldError = document.querySelector(`[data-error-for="${fieldId}"]`);
+
+    if (input) {
+      input.classList.add('input--error');
+      input.setAttribute('aria-invalid', 'true');
+    }
+
+    if (fieldError) {
+      fieldError.textContent = message;
+    }
+  });
+}
+
+function updateProgressIndicator() {
+  const sectionCompletion = {
+    scope: Boolean(document.getElementById('projectDescription').value.trim().length >= 10),
+    budget: Boolean(document.getElementById('budgetAmount').value) && Boolean(document.getElementById('budgetCurrency').value.trim().length === 3),
+    timeline: Boolean(document.getElementById('deadline').value)
+  };
+
+  const totalSections = Object.keys(sectionCompletion).length;
+  const completedSections = Object.values(sectionCompletion).filter(Boolean).length;
+  const completionPercent = Math.round((completedSections / totalSections) * 100);
+
+  if (progressPercentEl) {
+    progressPercentEl.textContent = `${completionPercent}%`;
+  }
+
+  sectionProgressEls.forEach((sectionEl) => {
+    const sectionName = sectionEl.getAttribute('data-section');
+    sectionEl.classList.toggle('is-complete', Boolean(sectionCompletion[sectionName]));
+  });
+}
+
+Object.keys(fieldSectionMap).forEach((fieldId) => {
+  const input = document.getElementById(fieldId);
+  input?.addEventListener('input', () => {
+    if (input.classList.contains('input--error')) {
+      input.classList.remove('input--error');
+      input.removeAttribute('aria-invalid');
+      const fieldError = document.querySelector(`[data-error-for="${fieldId}"]`);
+      if (fieldError) {
+        fieldError.textContent = '';
+      }
+    }
+    updateProgressIndicator();
+  });
+});
+
+updateProgressIndicator();
+
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   errorEl.textContent = '';
+  clearFieldErrors();
 
   const payload = {
     projectDescription: document.getElementById('projectDescription').value.trim(),
@@ -429,8 +523,17 @@ form.addEventListener('submit', async (event) => {
   };
 
   const validationErrors = validateFormInput(payload);
-  if (validationErrors.length) {
-    errorEl.textContent = validationErrors.join(' ');
+  const fieldErrors = validationErrors.fields;
+  if (Object.keys(fieldErrors).length) {
+    applyFieldErrors(fieldErrors);
+
+    const sectionMessages = [
+      ...validationErrors.scope,
+      ...validationErrors.budget,
+      ...validationErrors.timeline
+    ];
+
+    errorEl.textContent = sectionMessages.join(' ');
     resultsEl.classList.add('hidden');
     return;
   }
