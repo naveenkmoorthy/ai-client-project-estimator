@@ -221,7 +221,7 @@ body {
 
 .content-grid {
   display: grid;
-  grid-template-columns: minmax(320px, 0.95fr) minmax(360px, 1.05fr);
+  grid-template-columns: 1fr;
   gap: var(--space-6);
   align-items: start;
 }
