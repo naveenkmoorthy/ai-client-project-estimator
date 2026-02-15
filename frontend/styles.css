@@ -548,13 +548,51 @@ pre {
   min-height: 1.25rem;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   body {
-    padding: 1rem;
+    padding: var(--space-6);
   }
 
   .content-grid {
     grid-template-columns: 1fr;
+  }
+
+  .panel {
+    padding: var(--space-3);
+    margin-bottom: var(--space-3);
+    border-radius: var(--radius-md);
+  }
+
+  .results-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  textarea,
+  input,
+  button {
+    min-height: 2.75rem;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .result-content--table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .result-content--table .result-table {
+    min-width: 36rem;
+  }
+
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: var(--space-4);
   }
 
   .hero-trust-list {
@@ -562,9 +600,44 @@ pre {
     align-items: flex-start;
   }
 
-  .row,
-  .results-grid {
-    grid-template-columns: 1fr;
+  .panel {
+    padding: var(--space-3);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+  }
+
+  .result-card {
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .result-card--cost {
+    order: 1;
+  }
+
+  .result-card--timeline {
+    order: 2;
+  }
+
+  .result-card--risks {
+    order: 3;
+  }
+
+  .result-card--details {
+    order: 4;
+  }
+
+  .result-card--full {
+    order: 5;
+  }
+
+  .result-content--table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .result-content--table .result-table {
+    min-width: 30rem;
   }
 
   .milestone-item,
