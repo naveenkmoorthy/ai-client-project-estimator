@@ -231,7 +231,18 @@ function renderRiskFlags(risks) {
 
     const text = document.createElement('span');
     text.className = 'risk-text';
-    text.textContent = risk.flag || risk.description || String(risk);
+    const issue = typeof risk?.issue === 'string' ? risk.issue.trim() : '';
+    const mitigation = typeof risk?.mitigation === 'string' ? risk.mitigation.trim() : '';
+    const legacyText =
+      (typeof risk?.flag === 'string' && risk.flag.trim()) ||
+      (typeof risk?.description === 'string' && risk.description.trim()) ||
+      '';
+
+    if (issue && mitigation) {
+      text.textContent = `${issue} (Mitigation: ${mitigation})`;
+    } else {
+      text.textContent = issue || mitigation || legacyText || 'Unspecified risk';
+    }
 
     const badge = document.createElement('span');
     const severity = normalizeSeverity(risk.severity);
@@ -256,7 +267,14 @@ function renderEstimate(data) {
   outputFields.timeline.appendChild(renderTimeline(data.timeline));
   outputFields.costEstimate.appendChild(renderCostEstimate(data.costEstimate));
   outputFields.riskFlags.appendChild(renderRiskFlags(data.riskFlags));
-  outputFields.proposalDraft.textContent = data.proposalDraft || 'No proposal draft generated.';
+
+  const proposalContent =
+    (typeof data.proposalMarkdown === 'string' && data.proposalMarkdown.trim())
+    || (typeof data.proposalPlainText === 'string' && data.proposalPlainText.trim())
+    || (typeof data.proposalDraft === 'string' && data.proposalDraft.trim())
+    || 'No proposal draft generated.';
+
+  outputFields.proposalDraft.textContent = proposalContent;
   outputFields.rawJson.textContent = JSON.stringify(data, null, 2);
 
   resultsEl.classList.remove('hidden');
