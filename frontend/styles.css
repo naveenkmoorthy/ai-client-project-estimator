@@ -221,9 +221,17 @@ body {
 
 .content-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: var(--space-6);
   align-items: start;
+}
+
+#estimator-form {
+  grid-column: span 4;
+}
+
+#results {
+  grid-column: span 8;
 }
 
 .panel {
@@ -958,6 +966,11 @@ pre {
 
   .content-grid {
     grid-template-columns: 1fr;
+  }
+
+  #estimator-form,
+  #results {
+    grid-column: 1 / -1;
   }
 
   .panel {
