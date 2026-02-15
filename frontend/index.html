@@ -7,69 +7,79 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main class="container">
-      <h1>AI Client Project Estimator</h1>
+    <main class="container app-shell">
+      <header class="hero panel">
+        <span class="hero-badge">AI-powered</span>
+        <h1>AI Client Project Estimator</h1>
+        <p class="hero-subtitle">Generate a practical project estimate with structure you can share with clients and stakeholders.</p>
+        <ul class="hero-trust-list" aria-label="Estimator benefits">
+          <li>Fast estimate in seconds</li>
+          <li>Structured scope, timeline, and risk output</li>
+        </ul>
+      </header>
 
-      <form id="estimator-form" class="panel">
-        <label>
-          Project Description
-          <textarea id="projectDescription" required minlength="10" placeholder="Describe the project goals, scope, and key deliverables."></textarea>
-        </label>
-
-        <div class="row">
+      <section class="content-grid" aria-label="Estimator workspace">
+        <form id="estimator-form" class="panel">
           <label>
-            Budget Amount
-            <input id="budgetAmount" type="number" min="0" step="0.01" required />
+            Project Description
+            <textarea id="projectDescription" required minlength="10" placeholder="Describe the project goals, scope, and key deliverables."></textarea>
           </label>
 
-          <label>
-            Currency
-            <input id="budgetCurrency" type="text" minlength="3" maxlength="3" value="USD" required />
-          </label>
+          <div class="row">
+            <label>
+              Budget Amount
+              <input id="budgetAmount" type="number" min="0" step="0.01" required />
+            </label>
 
-          <label>
-            Deadline
-            <input id="deadline" type="date" required />
-          </label>
-        </div>
+            <label>
+              Currency
+              <input id="budgetCurrency" type="text" minlength="3" maxlength="3" value="USD" required />
+            </label>
 
-        <button type="submit">Generate Estimate</button>
-        <p id="error" class="error" aria-live="polite"></p>
-      </form>
+            <label>
+              Deadline
+              <input id="deadline" type="date" required />
+            </label>
+          </div>
 
-      <section id="results" class="panel hidden">
-        <h2>Estimate Results</h2>
-        <div class="results-grid">
-          <article class="result-card">
-          <h3>Task Breakdown</h3>
-          <div id="taskBreakdown" class="result-content"></div>
-          </article>
+          <button type="submit">Generate Estimate</button>
+          <p id="error" class="error" aria-live="polite"></p>
+        </form>
 
-          <article class="result-card">
-          <h3>Timeline</h3>
-          <div id="timeline" class="result-content"></div>
-          </article>
+        <section id="results" class="panel hidden">
+          <h2>Estimate Results</h2>
+          <div class="results-grid">
+            <article class="result-card">
+            <h3>Task Breakdown</h3>
+            <div id="taskBreakdown" class="result-content"></div>
+            </article>
 
-          <article class="result-card">
-          <h3>Cost Estimate</h3>
-          <div id="costEstimate" class="result-content"></div>
-          </article>
+            <article class="result-card">
+            <h3>Timeline</h3>
+            <div id="timeline" class="result-content"></div>
+            </article>
 
-          <article class="result-card">
-          <h3>Risk Flags</h3>
-          <div id="riskFlags" class="result-content"></div>
-          </article>
+            <article class="result-card">
+            <h3>Cost Estimate</h3>
+            <div id="costEstimate" class="result-content"></div>
+            </article>
 
-          <article class="result-card result-card--full">
-          <h3>Proposal Draft</h3>
-          <pre id="proposalDraft"></pre>
-          </article>
-        </div>
+            <article class="result-card">
+            <h3>Risk Flags</h3>
+            <div id="riskFlags" class="result-content"></div>
+            </article>
 
-        <details class="debug-panel">
-          <summary>Debug: Raw JSON</summary>
-          <pre id="rawJson" class="debug-json"></pre>
-        </details>
+            <article class="result-card result-card--full">
+            <h3>Proposal Draft</h3>
+            <pre id="proposalDraft"></pre>
+            </article>
+          </div>
+
+          <details class="debug-panel">
+            <summary>Debug: Raw JSON</summary>
+            <pre id="rawJson" class="debug-json"></pre>
+          </details>
+        </section>
       </section>
     </main>
 
