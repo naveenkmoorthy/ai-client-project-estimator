@@ -48,3 +48,13 @@ export PORT=3001
 ```
 
 > Note: This scaffold currently returns mock estimator output. Add provider SDK wiring and prompt logic in `backend/server.js` and templates under `shared/`.
+
+## Running Tests
+
+Run the backend automated test suite from the repo root:
+
+```bash
+node --test backend/tests/*.test.js
+```
+
+This is the same command you can use in CI.
