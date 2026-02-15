@@ -14,6 +14,11 @@ const fieldSectionMap = {
 };
 
 const outputFields = {
+  kpiTotalCost: document.getElementById('kpiTotalCost'),
+  kpiDuration: document.getElementById('kpiDuration'),
+  kpiRisk: document.getElementById('kpiRisk'),
+  kpiEffortHours: document.getElementById('kpiEffortHours'),
+  primaryRecommendation: document.getElementById('primaryRecommendation'),
   taskBreakdown: document.getElementById('taskBreakdown'),
   timeline: document.getElementById('timeline'),
   costEstimate: document.getElementById('costEstimate'),
@@ -288,6 +293,60 @@ function summarizeRiskLevel(risks) {
   return normalizeSeverity(highest).label;
 }
 
+function summarizeDuration(timeline) {
+  if (!Array.isArray(timeline) || timeline.length === 0) {
+    return 'TBD';
+  }
+
+  const dateValues = timeline.flatMap((milestone) => [
+    milestone?.startDate || milestone?.start || milestone?.date || milestone?.targetDate,
+    milestone?.endDate || milestone?.end || milestone?.date || milestone?.targetDate
+  ]).filter(Boolean);
+
+  const timestamps = dateValues
+    .map((value) => new Date(value).getTime())
+    .filter((value) => Number.isFinite(value));
+
+  if (timestamps.length < 2) {
+    return `${timeline.length} milestone${timeline.length === 1 ? '' : 's'}`;
+  }
+
+  const totalDays = Math.ceil((Math.max(...timestamps) - Math.min(...timestamps)) / (1000 * 60 * 60 * 24));
+  if (totalDays < 14) {
+    return `${totalDays} day${totalDays === 1 ? '' : 's'}`;
+  }
+
+  const totalWeeks = Math.ceil(totalDays / 7);
+  return `${totalWeeks} week${totalWeeks === 1 ? '' : 's'}`;
+}
+
+function calculateEffortHours(tasks) {
+  if (!Array.isArray(tasks)) {
+    return 0;
+  }
+
+  return tasks.reduce((sum, task) => {
+    const hours = Number(task?.hours ?? task?.estimatedHours);
+    return sum + (Number.isFinite(hours) ? hours : 0);
+  }, 0);
+}
+
+function getRecommendedBudgetRange(costEstimate) {
+  const total = Number(costEstimate?.total);
+  const contingency = Number(costEstimate?.contingency);
+  const currency = costEstimate?.currency || 'USD';
+
+  if (!Number.isFinite(total)) {
+    return 'Recommended budget range unavailable.';
+  }
+
+  const buffer = Number.isFinite(contingency) ? contingency : total * 0.1;
+  const minBudget = Math.max(0, total - buffer);
+  const maxBudget = total + buffer;
+
+  return `Recommended budget range: ${formatCurrency(minBudget, currency)} – ${formatCurrency(maxBudget, currency)}`;
+}
+
 function decorateProposalDraft(content) {
   const lines = content.split('\n');
   return lines.map((line) => {
@@ -380,6 +439,16 @@ function renderRiskFlags(risks) {
 }
 
 function renderEstimate(data) {
+  const totalCost = formatCurrency(Number(data.costEstimate?.total), data.costEstimate?.currency || 'USD');
+  const riskLevel = summarizeRiskLevel(data.riskFlags);
+  const effortHours = calculateEffortHours(data.taskBreakdown);
+
+  outputFields.kpiTotalCost.textContent = totalCost;
+  outputFields.kpiDuration.textContent = summarizeDuration(data.timeline);
+  outputFields.kpiRisk.textContent = riskLevel;
+  outputFields.kpiEffortHours.textContent = `${effortHours}h`;
+  outputFields.primaryRecommendation.textContent = getRecommendedBudgetRange(data.costEstimate);
+
   clearElement(outputFields.taskBreakdown);
   clearElement(outputFields.timeline);
   clearElement(outputFields.costEstimate);

@@ -94,6 +94,30 @@
 
         <section id="results" class="panel hidden">
           <h2>Estimate Results</h2>
+
+          <section class="kpi-summary" aria-label="Estimate overview KPIs">
+            <div class="results-grid">
+              <article class="result-card">
+                <h3>Total cost</h3>
+                <p id="kpiTotalCost" class="result-primary-value">N/A</p>
+              </article>
+              <article class="result-card">
+                <h3>Estimated duration</h3>
+                <p id="kpiDuration" class="result-primary-value">N/A</p>
+              </article>
+              <article class="result-card">
+                <h3>Confidence / risk</h3>
+                <p id="kpiRisk" class="result-primary-value">N/A</p>
+              </article>
+              <article class="result-card">
+                <h3>Estimated effort</h3>
+                <p id="kpiEffortHours" class="result-primary-value">N/A</p>
+              </article>
+            </div>
+          </section>
+
+          <p id="primaryRecommendation" class="result-card"></p>
+
           <div class="results-grid">
             <article class="result-card result-card--details">
             <h3>Task Breakdown</h3>
@@ -121,8 +145,8 @@
             </article>
           </div>
 
-          <details class="debug-panel">
-            <summary>Debug: Raw JSON</summary>
+          <details class="debug-panel" style="opacity: 0.72; margin-top: 1.25rem;">
+            <summary>Developer only: Debug raw JSON</summary>
             <pre id="rawJson" class="debug-json"></pre>
           </details>
         </section>
