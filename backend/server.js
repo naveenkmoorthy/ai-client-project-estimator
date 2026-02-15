@@ -1,5 +1,9 @@
 const http = require('http');
+const path = require('path');
 const { createEstimate } = require('./services/estimator');
+const { loadEnvFile } = require('./loadEnv');
+
+loadEnvFile(path.join(__dirname, '..', '.env'));
 
 const PORT = process.env.PORT || 3001;
 
