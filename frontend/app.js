@@ -267,7 +267,14 @@ function renderEstimate(data) {
   outputFields.timeline.appendChild(renderTimeline(data.timeline));
   outputFields.costEstimate.appendChild(renderCostEstimate(data.costEstimate));
   outputFields.riskFlags.appendChild(renderRiskFlags(data.riskFlags));
-  outputFields.proposalDraft.textContent = data.proposalDraft || 'No proposal draft generated.';
+
+  const proposalContent =
+    (typeof data.proposalMarkdown === 'string' && data.proposalMarkdown.trim())
+    || (typeof data.proposalPlainText === 'string' && data.proposalPlainText.trim())
+    || (typeof data.proposalDraft === 'string' && data.proposalDraft.trim())
+    || 'No proposal draft generated.';
+
+  outputFields.proposalDraft.textContent = proposalContent;
   outputFields.rawJson.textContent = JSON.stringify(data, null, 2);
 
   resultsEl.classList.remove('hidden');
