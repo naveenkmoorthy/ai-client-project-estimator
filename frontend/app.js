@@ -193,6 +193,100 @@ function createSummaryRow(label, value) {
   return row;
 }
 
+function createCardMetaRow(icon, label) {
+  const row = document.createElement('div');
+  row.className = 'result-meta';
+
+  const iconEl = document.createElement('span');
+  iconEl.className = 'result-meta-icon';
+  iconEl.setAttribute('aria-hidden', 'true');
+  iconEl.textContent = icon;
+
+  const labelEl = document.createElement('span');
+  labelEl.className = 'result-meta-label';
+  labelEl.textContent = label;
+
+  row.append(iconEl, labelEl);
+  return row;
+}
+
+function createCardPrimaryMetric(label, value) {
+  const metric = document.createElement('div');
+  metric.className = 'result-primary';
+
+  const labelEl = document.createElement('span');
+  labelEl.className = 'result-primary-label';
+  labelEl.textContent = label;
+
+  const valueEl = document.createElement('strong');
+  valueEl.className = 'result-primary-value';
+  valueEl.textContent = value;
+
+  metric.append(labelEl, valueEl);
+  return metric;
+}
+
+function setCardMetadata(contentId, metadata) {
+  const content = document.getElementById(contentId);
+  const card = content ? content.closest('.result-card') : null;
+  if (!card) {
+    return;
+  }
+
+  card.querySelector('.result-meta')?.remove();
+  card.querySelector('.result-primary')?.remove();
+
+  const heading = card.querySelector('h3');
+  if (!heading) {
+    return;
+  }
+
+  const metaRow = createCardMetaRow(metadata.icon, metadata.metaLabel);
+  const primaryMetric = createCardPrimaryMetric(metadata.primaryLabel, metadata.primaryValue);
+
+  heading.insertAdjacentElement('afterend', metaRow);
+  metaRow.insertAdjacentElement('afterend', primaryMetric);
+}
+
+function summarizeRiskLevel(risks) {
+  if (!Array.isArray(risks) || risks.length === 0) {
+    return 'No risks';
+  }
+
+  const priority = ['critical', 'high', 'medium', 'low'];
+  const severities = risks
+    .map((risk) => normalizeSeverity(risk?.severity).key)
+    .filter((value) => priority.includes(value));
+
+  if (severities.length === 0) {
+    return 'Unknown';
+  }
+
+  const highest = priority.find((level) => severities.includes(level));
+  return normalizeSeverity(highest).label;
+}
+
+function decorateProposalDraft(content) {
+  const lines = content.split('\n');
+  return lines.map((line) => {
+    const escaped = line
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;');
+
+    let className = 'proposal-line';
+    if (/^#{1,3}\s+/.test(line)) {
+      className += ' proposal-line--heading';
+    } else if (/^[-*]\s+/.test(line) || /^\d+\.\s+/.test(line)) {
+      className += ' proposal-line--list';
+    } else if (!line.trim()) {
+      className += ' proposal-line--spacer';
+    }
+
+    return `<span class="${className}">${escaped || '&nbsp;'}</span>`;
+  }).join('');
+}
+
 function renderCostEstimate(cost) {
   const container = document.createElement('div');
 
@@ -205,10 +299,13 @@ function renderCostEstimate(cost) {
   summary.className = 'summary-list';
   const currency = cost.currency || 'USD';
 
-  summary.append(
+  const totalRow = createSummaryRow('Total', formatCurrency(Number(cost.total), currency));
+  totalRow.classList.add('summary-row--total');
+
+  summary.replaceChildren(
     createSummaryRow('Subtotal', formatCurrency(Number(cost.subtotal), currency)),
     createSummaryRow('Contingency', formatCurrency(Number(cost.contingency), currency)),
-    createSummaryRow('Total', formatCurrency(Number(cost.total), currency)),
+    totalRow,
     createSummaryRow('Currency', currency)
   );
 
@@ -248,6 +345,7 @@ function renderRiskFlags(risks) {
 
     const badge = document.createElement('span');
     const severity = normalizeSeverity(risk.severity);
+    item.classList.add(`risk-item--${severity.key}`);
     badge.className = `risk-badge risk-badge--${severity.key}`;
     badge.textContent = severity.label;
 
@@ -276,8 +374,43 @@ function renderEstimate(data) {
     || (typeof data.proposalDraft === 'string' && data.proposalDraft.trim())
     || 'No proposal draft generated.';
 
-  outputFields.proposalDraft.textContent = proposalContent;
+  outputFields.proposalDraft.innerHTML = decorateProposalDraft(proposalContent);
   outputFields.rawJson.textContent = JSON.stringify(data, null, 2);
+
+  setCardMetadata('taskBreakdown', {
+    icon: '🧩',
+    metaLabel: 'Work scope',
+    primaryLabel: 'Tasks',
+    primaryValue: String(Array.isArray(data.taskBreakdown) ? data.taskBreakdown.length : 0)
+  });
+
+  setCardMetadata('timeline', {
+    icon: '🗓️',
+    metaLabel: 'Delivery cadence',
+    primaryLabel: 'Milestones',
+    primaryValue: String(Array.isArray(data.timeline) ? data.timeline.length : 0)
+  });
+
+  setCardMetadata('costEstimate', {
+    icon: '💵',
+    metaLabel: 'Budget snapshot',
+    primaryLabel: 'Total Cost',
+    primaryValue: formatCurrency(Number(data.costEstimate?.total), data.costEstimate?.currency || 'USD')
+  });
+
+  setCardMetadata('riskFlags', {
+    icon: '⚠️',
+    metaLabel: 'Risk outlook',
+    primaryLabel: 'Top Severity',
+    primaryValue: summarizeRiskLevel(data.riskFlags)
+  });
+
+  setCardMetadata('proposalDraft', {
+    icon: '📝',
+    metaLabel: 'Client-ready narrative',
+    primaryLabel: 'Draft Length',
+    primaryValue: `${proposalContent.split(/\s+/).filter(Boolean).length} words`
+  });
 
   resultsEl.classList.remove('hidden');
 }
