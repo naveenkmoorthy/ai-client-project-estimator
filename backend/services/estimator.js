@@ -1,5 +1,10 @@
+const fs = require('fs');
+const path = require('path');
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 const { deriveEstimationSignals } = require('./rules/estimation_rules');
+const proposalTemplatePath = path.resolve(__dirname, '../../shared/templates/proposal.md');
+const proposalTemplate = fs.readFileSync(proposalTemplatePath, 'utf8');
 
 function normalizeInput(rawInput) {
   const normalizedDescription = String(rawInput.projectDescription || '').trim();
@@ -269,6 +274,84 @@ function generateProposalDraft(allSections) {
   ].join('\n');
 }
 
+function formatCurrency(value, currency) {
+  return `${Number(value).toFixed(2)} ${currency}`;
+}
+
+function mapEstimatorOutputsToTemplateVariables(allSections) {
+  const hasDescription = Boolean(allSections.projectDescription);
+  const hasBudget = allSections.budget && allSections.budget.amount > 0;
+  const hasTimeline = Array.isArray(allSections.timeline) && allSections.timeline.length > 0;
+  const assumptions = [];
+
+  if (!hasDescription) {
+    assumptions.push('- Project details are limited, so effort estimates are based on a standard web delivery workflow.');
+  }
+
+  if (!hasBudget) {
+    assumptions.push(`- Budget was not provided or is zero, so pricing is modeled from estimated effort in ${allSections.costEstimate.currency}.`);
+  }
+
+  if (!hasTimeline) {
+    assumptions.push(`- Milestone dates are provisional and currently aligned to the stated deadline (${allSections.deadline}).`);
+  }
+
+  const explicitAssumptions = assumptions.length > 0
+    ? assumptions.join('\n')
+    : '- Assumptions are based on the provided project description, budget, and deadline inputs.';
+
+  const workBreakdown = allSections.taskBreakdown
+    .map((task) => `- **${task.task}** (${task.estimatedHours}h): ${task.description}`)
+    .join('\n');
+
+  const timelineAndMilestones = allSections.timeline
+    .map((item) => `- ${item.date}: ${item.milestone}`)
+    .join('\n');
+
+  const risksAndMitigations = allSections.riskFlags.length > 0
+    ? allSections.riskFlags
+      .map((risk) => `- **${risk.severity.toUpperCase()}**: ${risk.issue} Mitigation: ${risk.mitigation}`)
+      .join('\n')
+    : '- No material risks identified at this stage. Mitigation planning will continue during kickoff.';
+
+  return {
+    executiveSummary: `This proposal outlines a focused delivery plan for ${hasDescription ? 'the requested initiative' : 'the scoped project'}. The current estimate targets completion by ${allSections.deadline} with a total projected investment of ${formatCurrency(allSections.costEstimate.total, allSections.costEstimate.currency)}.`,
+    scopeAndAssumptions: [
+      '- Scope includes planning, implementation, QA, and delivery handoff.',
+      explicitAssumptions
+    ].join('\n'),
+    workBreakdown,
+    timelineAndMilestones,
+    pricingAndPaymentAssumptions: [
+      `- Subtotal: ${formatCurrency(allSections.costEstimate.subtotal, allSections.costEstimate.currency)}.`,
+      `- Contingency: ${formatCurrency(allSections.costEstimate.contingency, allSections.costEstimate.currency)}.`,
+      `- Total estimate: ${formatCurrency(allSections.costEstimate.total, allSections.costEstimate.currency)}.`,
+      '- Payment assumption: 50% at kickoff and 50% upon final delivery acceptance.'
+    ].join('\n'),
+    risksAndMitigations,
+    nextSteps: [
+      '- Confirm scope priorities and acceptance criteria.',
+      '- Approve timeline and budget assumptions.',
+      '- Schedule kickoff and begin execution.'
+    ].join('\n')
+  };
+}
+
+function renderTemplate(template, variables) {
+  return Object.entries(variables).reduce((output, [key, value]) => {
+    return output.replace(new RegExp(`{{${key}}}`, 'g'), value);
+  }, template);
+}
+
+function markdownToPlainText(markdown) {
+  return markdown
+    .replace(/^#+\s*/gm, '')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/^-\s+/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 function createEstimate(rawInput) {
   const normalizedInput = normalizeInput(rawInput);
   const taskBreakdown = generateTaskBreakdown(normalizedInput.projectDescription);
@@ -299,6 +382,17 @@ function createEstimate(rawInput) {
     estimationSignals
   });
 
+  const proposalVariables = mapEstimatorOutputsToTemplateVariables({
+    ...normalizedInput,
+    taskBreakdown,
+    timeline,
+    costEstimate,
+    riskFlags,
+    estimationSignals
+  });
+  const proposalMarkdown = renderTemplate(proposalTemplate, proposalVariables);
+  const proposalPlainText = markdownToPlainText(proposalMarkdown);
+
   return {
     normalizedInput,
     taskBreakdown,
@@ -306,7 +400,9 @@ function createEstimate(rawInput) {
     costEstimate,
     riskFlags,
     estimationSignals,
-    proposalDraft
+    proposalDraft,
+    proposalMarkdown,
+    proposalPlainText
   };
 }
 
@@ -316,5 +412,8 @@ module.exports = {
   generateTimeline,
   generateCostEstimate,
   generateProposalDraft,
+  mapEstimatorOutputsToTemplateVariables,
+  renderTemplate,
+  markdownToPlainText,
   createEstimate
 };
