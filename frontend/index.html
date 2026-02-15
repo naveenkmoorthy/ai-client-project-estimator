@@ -37,30 +37,56 @@
 
       <section class="content-grid" aria-label="Estimator workspace">
         <form id="estimator-form" class="panel">
-          <label>
-            Project Description
-            <textarea id="projectDescription" required minlength="10" placeholder="Describe the project goals, scope, and key deliverables."></textarea>
-          </label>
+          <div id="form-progress" class="form-progress" aria-live="polite">
+            <p class="form-progress__label">Progress: <strong id="progressPercent">0%</strong> complete</p>
+            <ol class="form-progress__sections">
+              <li data-section="scope">Project scope</li>
+              <li data-section="budget">Budget</li>
+              <li data-section="timeline">Timeline</li>
+            </ol>
+          </div>
 
-          <div class="row">
+          <section class="form-group" aria-labelledby="scope-heading">
+            <h2 id="scope-heading" class="form-group__title">Project scope</h2>
+            <p class="form-group__copy">Describe what you need built so the estimate can produce realistic tasks and assumptions.</p>
             <label>
-              Budget Amount
-              <input id="budgetAmount" type="number" min="0" step="0.01" required />
-              <span class="field-hint">Enter your maximum project budget before taxes or contingency.</span>
+              Project Description
+              <textarea id="projectDescription" required minlength="10" placeholder="Describe the project goals, scope, and key deliverables."></textarea>
+              <span class="field-hint">Share the business goal, core features, and expected outcome.</span>
+              <span class="field-error" data-error-for="projectDescription" aria-live="polite"></span>
             </label>
+          </section>
 
-            <label>
-              Currency
-              <input id="budgetCurrency" type="text" minlength="3" maxlength="3" value="USD" required />
-              <span class="field-hint">Use a 3-letter ISO code (for example: USD, EUR, GBP).</span>
-            </label>
+          <section class="form-group" aria-labelledby="budget-heading">
+            <h2 id="budget-heading" class="form-group__title">Budget</h2>
+            <p class="form-group__copy">Set financial constraints so cost recommendations align with your limits.</p>
+            <div class="row">
+              <label>
+                Budget Amount
+                <input id="budgetAmount" type="number" min="0" step="0.01" required />
+                <span class="field-hint">Enter your maximum project budget before taxes or contingency.</span>
+                <span class="field-error" data-error-for="budgetAmount" aria-live="polite"></span>
+              </label>
 
+              <label>
+                Currency
+                <input id="budgetCurrency" type="text" minlength="3" maxlength="3" value="USD" required />
+                <span class="field-hint">Use a 3-letter ISO code (for example: USD, EUR, GBP).</span>
+                <span class="field-error" data-error-for="budgetCurrency" aria-live="polite"></span>
+              </label>
+            </div>
+          </section>
+
+          <section class="form-group" aria-labelledby="timeline-heading">
+            <h2 id="timeline-heading" class="form-group__title">Timeline</h2>
+            <p class="form-group__copy">Capture your target launch date to shape delivery milestones.</p>
             <label>
               Deadline
               <input id="deadline" type="date" required />
               <span class="field-hint">Choose the desired launch or delivery date for the project.</span>
+              <span class="field-error" data-error-for="deadline" aria-live="polite"></span>
             </label>
-          </div>
+          </section>
 
           <button type="submit">Generate Estimate</button>
           <p id="error" class="error" aria-live="polite"></p>
