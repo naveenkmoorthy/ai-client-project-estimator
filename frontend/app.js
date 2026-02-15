@@ -231,7 +231,18 @@ function renderRiskFlags(risks) {
 
     const text = document.createElement('span');
     text.className = 'risk-text';
-    text.textContent = risk.flag || risk.description || String(risk);
+    const issue = typeof risk?.issue === 'string' ? risk.issue.trim() : '';
+    const mitigation = typeof risk?.mitigation === 'string' ? risk.mitigation.trim() : '';
+    const legacyText =
+      (typeof risk?.flag === 'string' && risk.flag.trim()) ||
+      (typeof risk?.description === 'string' && risk.description.trim()) ||
+      '';
+
+    if (issue && mitigation) {
+      text.textContent = `${issue} (Mitigation: ${mitigation})`;
+    } else {
+      text.textContent = issue || mitigation || legacyText || 'Unspecified risk';
+    }
 
     const badge = document.createElement('span');
     const severity = normalizeSeverity(risk.severity);
