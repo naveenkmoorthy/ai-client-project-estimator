@@ -241,7 +241,7 @@ body {
 
 .pricing-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-3);
 }
 
@@ -251,12 +251,23 @@ body {
   padding: var(--space-4);
   background: var(--color-surface-soft);
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  color: var(--color-text-primary);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.pricing-card:hover,
+.pricing-card:focus-within {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--color-primary-600) 30%, var(--color-border-subtle));
+  box-shadow: var(--shadow-elevation-1);
 }
 
 .pricing-card--highlight {
-  border-color: color-mix(in srgb, var(--color-primary-600) 42%, var(--color-border-subtle));
-  background: linear-gradient(180deg, #f7f8ff, #f1f5ff);
+  position: relative;
+  border-color: #4f46e5;
+  background: linear-gradient(180deg, #eef2ff, #e8edff);
+  box-shadow: 0 12px 24px rgba(79, 70, 229, 0.18);
 }
 
 .pricing-card__price {
@@ -269,6 +280,34 @@ body {
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--color-text-muted);
+}
+
+.pricing-card__summary {
+  margin: 0;
+}
+
+.pricing-card__features {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: var(--space-1);
+  color: var(--color-text-secondary);
+}
+
+.pricing-card__features li::marker {
+  color: var(--color-primary-700);
+}
+
+.pricing-card__badge {
+  justify-self: start;
+  margin: 0;
+  border-radius: var(--radius-pill);
+  padding: 0.2rem 0.65rem;
+  background: #312e81;
+  color: #ffffff;
+  font-size: var(--font-size-helper);
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .faq-list {
@@ -1396,9 +1435,12 @@ pre {
 
   .feature-grid,
   .steps-flow,
-  .pricing-grid,
   .site-footer__inner {
     grid-template-columns: 1fr;
+  }
+
+  .pricing-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .product-preview {
@@ -1490,6 +1532,10 @@ pre {
   .logo-strip {
     display: grid;
     grid-template-columns: 1fr 1fr;
+  }
+
+  .pricing-grid {
+    grid-template-columns: 1fr;
   }
 
   .hero {
