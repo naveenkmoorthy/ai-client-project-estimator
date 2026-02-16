@@ -7,6 +7,19 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <nav class="top-nav" aria-label="Primary">
+      <div class="container top-nav__inner">
+        <a href="./index.html" class="brand" aria-label="Estimator home">⚡ Estimator Pro</a>
+        <ul class="top-nav__links">
+          <li><a href="#features">Features</a></li>
+          <li><a href="#how-it-works">How it works</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+        <a class="btn btn--primary top-nav__cta" href="./estimator.html">Try estimator</a>
+      </div>
+    </nav>
+
     <main class="container app-shell">
       <header class="hero panel">
         <div class="hero__content">
@@ -14,8 +27,8 @@
           <h1 class="text-headline">Win client confidence with a polished estimate in under 5 minutes.</h1>
           <p class="hero-subtitle text-subhead">Scope projects faster, cut revision cycles, and send stakeholder-ready plans without spreadsheet rework.</p>
           <div class="hero__actions">
-            <a class="btn btn--primary" href="#estimator-form">Build my first draft</a>
-            <a class="btn btn--secondary" href="#results">Preview deliverables</a>
+            <a class="btn btn--primary" href="./estimator.html">Build my first draft</a>
+            <a class="btn btn--secondary" href="./estimator.html#results">Preview deliverables</a>
           </div>
           <p class="text-helper">No signup required • Export-ready proposal draft included</p>
         </div>
@@ -36,130 +49,127 @@
         </aside>
       </header>
 
-      <section class="content-grid" aria-label="Estimator workspace">
-        <form id="estimator-form" class="panel">
-          <div id="form-progress" class="form-progress" aria-live="polite">
-            <p class="form-progress__label">Progress: <strong id="progressPercent">0%</strong> complete</p>
-            <ol class="form-progress__sections">
-              <li data-section="scope">Project scope</li>
-              <li data-section="budget">Budget</li>
-              <li data-section="timeline">Timeline</li>
-            </ol>
-          </div>
+      <section id="features" class="panel marketing-section" aria-labelledby="features-heading">
+        <div class="section-header">
+          <p class="section-kicker">Features</p>
+          <h2 id="features-heading">Everything needed for decision-ready project estimates</h2>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card">
+            <p class="feature-card__icon" aria-hidden="true">🧭</p>
+            <h3>Clear scope mapping</h3>
+            <p>Turn rough requests into a structured backlog with assumptions called out up front.</p>
+          </article>
+          <article class="feature-card">
+            <p class="feature-card__icon" aria-hidden="true">💸</p>
+            <h3>Budget confidence</h3>
+            <p>Generate transparent cost ranges that support internal approvals and client conversations.</p>
+          </article>
+          <article class="feature-card">
+            <p class="feature-card__icon" aria-hidden="true">📅</p>
+            <h3>Timeline alignment</h3>
+            <p>Build milestone plans tied to delivery dates so teams can commit with fewer revisions.</p>
+          </article>
+          <article class="feature-card">
+            <p class="feature-card__icon" aria-hidden="true">⚠️</p>
+            <h3>Risk visibility</h3>
+            <p>Surface blockers and dependencies early to prevent surprise delays during execution.</p>
+          </article>
+        </div>
+      </section>
 
-          <section class="form-group" aria-labelledby="scope-heading">
-            <h2 id="scope-heading" class="form-group__title section-heading">Project scope</h2>
-            <p class="form-group__copy">Share the desired outcome and must-have features so the plan can lock scope faster.</p>
-            <label>
-              Project Description
-              <textarea id="projectDescription" required minlength="10" placeholder="Example: Launch a self-serve customer portal with SSO, billing, and admin reporting."></textarea>
-              <span class="field-hint">Include business goal, must-have features, and key constraints to reduce back-and-forth revisions.</span>
-              <span class="field-error" data-error-for="projectDescription" aria-live="polite"></span>
-            </label>
-          </section>
+      <section id="how-it-works" class="panel marketing-section" aria-labelledby="how-heading">
+        <div class="section-header">
+          <p class="section-kicker">How it works</p>
+          <h2 id="how-heading">From brief to polished estimate in three steps</h2>
+        </div>
+        <ol class="steps-flow">
+          <li class="step-card">
+            <span class="step-number">1</span>
+            <h3>Describe your project</h3>
+            <p>Add the business goal, must-have features, and target deadline.</p>
+          </li>
+          <li class="step-card">
+            <span class="step-number">2</span>
+            <h3>Set budget guardrails</h3>
+            <p>Provide your budget and currency to keep recommendations realistic.</p>
+          </li>
+          <li class="step-card">
+            <span class="step-number">3</span>
+            <h3>Export your draft</h3>
+            <p>Review milestones, risks, and proposal output, then export for stakeholders.</p>
+          </li>
+        </ol>
+      </section>
 
-          <section class="form-group" aria-labelledby="budget-heading">
-            <h2 id="budget-heading" class="form-group__title section-heading">Budget</h2>
-            <p class="form-group__copy">Set investment guardrails so recommendations stay decision-ready for approval.</p>
-            <div class="row">
-              <label>
-                Budget Amount
-                <input id="budgetAmount" type="number" min="0" step="0.01" required />
-                <span class="field-hint">Use the budget ceiling stakeholders can approve today, before contingency.</span>
-                <span class="field-error" data-error-for="budgetAmount" aria-live="polite"></span>
-              </label>
+      <section class="integrations-strip panel" aria-label="Integrations and partner systems">
+        <p class="section-kicker">Integrations</p>
+        <div class="logo-strip" role="list" aria-label="Connected tools">
+          <span role="listitem">Slack</span>
+          <span role="listitem">Notion</span>
+          <span role="listitem">Jira</span>
+          <span role="listitem">Google Drive</span>
+          <span role="listitem">HubSpot</span>
+        </div>
+      </section>
 
-              <label>
-                Currency
-                <input id="budgetCurrency" type="text" minlength="3" maxlength="3" value="USD" required />
-                <span class="field-hint">Use your contracting currency (3-letter ISO code, such as USD or EUR).</span>
-                <span class="field-error" data-error-for="budgetCurrency" aria-live="polite"></span>
-              </label>
-            </div>
-          </section>
+      <section id="pricing" class="panel marketing-section" aria-labelledby="pricing-heading">
+        <div class="section-header">
+          <p class="section-kicker">Pricing</p>
+          <h2 id="pricing-heading">Simple plans for teams that ship faster</h2>
+        </div>
+        <div class="pricing-grid">
+          <article class="pricing-card">
+            <h3>Starter</h3>
+            <p class="pricing-card__price">$0<span>/month</span></p>
+            <p>Perfect for evaluating estimate quality with unlimited local drafts.</p>
+            <a class="btn btn--secondary" href="./estimator.html">Start free</a>
+          </article>
+          <article class="pricing-card pricing-card--highlight">
+            <h3>Team</h3>
+            <p class="pricing-card__price">$49<span>/month</span></p>
+            <p>Collaboration, branded exports, and shared estimate templates for growing teams.</p>
+            <a class="btn btn--primary" href="./estimator.html">Start trial</a>
+          </article>
+        </div>
+      </section>
 
-          <section class="form-group" aria-labelledby="timeline-heading">
-            <h2 id="timeline-heading" class="form-group__title section-heading">Timeline</h2>
-            <p class="form-group__copy">Set the target decision date so delivery phases align with business priorities.</p>
-            <label>
-              Deadline
-              <input id="deadline" type="date" required />
-              <span class="field-hint">Choose the date you need this live, approved, or presented to stakeholders.</span>
-              <span class="field-error" data-error-for="deadline" aria-live="polite"></span>
-            </label>
-          </section>
-
-          <button type="submit">Generate decision-ready draft</button>
-          <p id="error" class="error" aria-live="polite"></p>
-        </form>
-
-        <section id="results" class="panel hidden">
-          <div class="results-header">
-            <h2 class="section-heading">Delivery Plan Snapshot</h2>
-            <div class="export-actions" role="group" aria-label="Export proposal actions">
-              <button id="exportPdf" type="button" class="export-btn">Export PDF</button>
-              <button id="exportDocx" type="button" class="export-btn">Export DOCX</button>
-            </div>
-          </div>
-
-          <section class="kpi-summary" aria-label="Estimate overview KPIs">
-            <div class="results-grid">
-              <article class="result-card kpi-tile">
-                <h3 class="section-heading">Budget ask</h3>
-                <p id="kpiTotalCost" class="result-primary-value">N/A</p>
-              </article>
-              <article class="result-card kpi-tile">
-                <h3 class="section-heading">Delivery window</h3>
-                <p id="kpiDuration" class="result-primary-value">N/A</p>
-              </article>
-              <article class="result-card kpi-tile">
-                <h3 class="section-heading">Delivery risk level</h3>
-                <p id="kpiRisk" class="result-primary-value">N/A</p>
-              </article>
-              <article class="result-card kpi-tile">
-                <h3 class="section-heading">Team effort</h3>
-                <p id="kpiEffortHours" class="result-primary-value">N/A</p>
-              </article>
-            </div>
-          </section>
-
-          <p id="primaryRecommendation" class="result-card"></p>
-
-          <div class="results-grid">
-            <article class="result-card result-card--details">
-            <h3>Scope Breakdown</h3>
-            <div id="taskBreakdown" class="result-content result-content--table"></div>
-            </article>
-
-            <article class="result-card result-card--timeline">
-            <h3>Delivery Milestones</h3>
-            <div id="timeline" class="result-content"></div>
-            </article>
-
-            <article class="result-card result-card--cost">
-            <h3>Budget Plan</h3>
-            <div id="costEstimate" class="result-content"></div>
-            </article>
-
-            <article class="result-card result-card--risks">
-            <h3>Risk Watchlist</h3>
-            <div id="riskFlags" class="result-content"></div>
-            </article>
-
-            <article class="result-card result-card--full">
-            <h3>Stakeholder Proposal Draft</h3>
-            <pre id="proposalDraft"></pre>
-            </article>
-          </div>
-
-          <details class="debug-panel" style="opacity: 0.72; margin-top: 1.25rem;">
-            <summary>Developer only: Debug raw JSON</summary>
-            <pre id="rawJson" class="debug-json"></pre>
+      <section id="faq" class="panel marketing-section" aria-labelledby="faq-heading">
+        <div class="section-header">
+          <p class="section-kicker">FAQ</p>
+          <h2 id="faq-heading">Answers before you start</h2>
+        </div>
+        <div class="faq-list">
+          <details class="faq-item">
+            <summary>Can I use this before I have final requirements?</summary>
+            <p>Yes. Start with your best-known scope and iterate as requirements become clearer.</p>
           </details>
-        </section>
+          <details class="faq-item">
+            <summary>Does it replace delivery planning tools?</summary>
+            <p>No. It speeds up pre-sales and scoping, then outputs a plan you can move into your PM stack.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Can I share outputs with clients?</summary>
+            <p>Absolutely. The proposal draft and exports are designed for stakeholder-friendly communication.</p>
+          </details>
+        </div>
       </section>
     </main>
 
-    <script src="./app.js"></script>
+    <footer class="site-footer">
+      <div class="container site-footer__inner">
+        <div>
+          <p class="site-footer__brand">Estimator Pro</p>
+          <p class="text-helper">Built for pre-sales and delivery teams that need faster, clearer project plans.</p>
+        </div>
+        <ul class="site-footer__links">
+          <li><a href="#">Security</a></li>
+          <li><a href="#">Privacy</a></li>
+          <li><a href="#">Terms</a></li>
+          <li><a href="#">Status</a></li>
+        </ul>
+        <a class="btn btn--secondary" href="./estimator.html">Create your first estimate</a>
+      </div>
+    </footer>
   </body>
 </html>
