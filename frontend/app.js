@@ -4,6 +4,7 @@ const defaultSubmitLabel = submitButton ? submitButton.textContent : 'Generate d
 const errorEl = document.getElementById('error');
 const resultsEl = document.getElementById('results');
 const resultsHeadingEl = resultsEl?.querySelector('h2');
+const resultsPlaceholderEl = document.getElementById('results-placeholder');
 const exportPdfButton = document.getElementById('exportPdf');
 const exportDocxButton = document.getElementById('exportDocx');
 const progressPercentEl = document.getElementById('progressPercent');
@@ -122,11 +123,17 @@ function ensureResultsBanner(type, message) {
 }
 
 function showResults() {
+  resultsPlaceholderEl?.classList.add('hidden');
   resultsEl.classList.remove('hidden');
   resultsEl.classList.remove('is-visible');
   requestAnimationFrame(() => {
     resultsEl.classList.add('is-visible');
   });
+}
+
+function showResultsPlaceholder() {
+  resultsEl.classList.add('hidden');
+  resultsPlaceholderEl?.classList.remove('hidden');
 }
 
 function renderSkeletonBlock(lines = 3) {
@@ -865,7 +872,7 @@ form.addEventListener('submit', async (event) => {
     ];
 
     errorEl.textContent = sectionMessages.join(' ');
-    resultsEl.classList.add('hidden');
+    showResultsPlaceholder();
     return;
   }
 
@@ -895,7 +902,7 @@ form.addEventListener('submit', async (event) => {
     setExportButtonsState({ disabled: false });
   } catch (error) {
     showRequestFailure(error.message);
-    resultsEl.classList.add('hidden');
+    showResultsPlaceholder();
   } finally {
     if (submitButton) {
       submitButton.disabled = false;

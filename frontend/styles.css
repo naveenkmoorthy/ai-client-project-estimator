@@ -66,7 +66,7 @@
 
 body {
   margin: 0;
-  padding: var(--space-8);
+  padding: var(--space-8) var(--space-8) var(--space-6);
   background: linear-gradient(180deg, var(--color-bg-base), #ffffff 72%);
   color: var(--color-text-primary);
   font-family: var(--font-family-sans);
@@ -84,6 +84,244 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+  margin-top: var(--space-8);
+}
+
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(8px);
+  background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border-subtle) 80%, white);
+}
+
+.top-nav__inner {
+  min-height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.brand {
+  color: var(--color-primary-700);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.top-nav__links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.top-nav__links a {
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.top-nav__links a:hover {
+  color: var(--color-primary-700);
+}
+
+.section-header {
+  margin-bottom: var(--space-4);
+}
+
+.section-kicker {
+  margin: 0 0 var(--space-1);
+  color: var(--color-primary-700);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.marketing-section h2 {
+  margin-bottom: 0;
+}
+
+.estimator-page-intro {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.estimator-page-intro h1 {
+  margin-bottom: 0;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.feature-card {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: var(--color-surface-soft);
+}
+
+.feature-card__icon {
+  margin: 0 0 var(--space-2);
+  font-size: 1.25rem;
+}
+
+.feature-card h3,
+.feature-card p,
+.step-card h3,
+.step-card p,
+.pricing-card h3,
+.pricing-card p {
+  margin: 0;
+}
+
+.feature-card p,
+.step-card p,
+.pricing-card p,
+.faq-item p {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+}
+
+.steps-flow {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.step-card {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: var(--color-surface);
+}
+
+.step-number {
+  display: inline-flex;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--color-primary-600) 16%, white);
+  color: var(--color-primary-700);
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+
+.integrations-strip {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.logo-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.logo-strip span {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 0.35rem 0.75rem;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  background: var(--color-surface-soft);
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.pricing-card {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  background: var(--color-surface-soft);
+  display: grid;
+  gap: var(--space-2);
+}
+
+.pricing-card--highlight {
+  border-color: color-mix(in srgb, var(--color-primary-600) 42%, var(--color-border-subtle));
+  background: linear-gradient(180deg, #f7f8ff, #f1f5ff);
+}
+
+.pricing-card__price {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--color-primary-700);
+}
+
+.pricing-card__price span {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.faq-list {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.faq-item {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: var(--color-surface-soft);
+}
+
+.faq-item summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.site-footer {
+  margin-top: var(--space-8);
+  border-top: 1px solid var(--color-border-subtle);
+  background: color-mix(in srgb, var(--color-surface) 95%, transparent);
+}
+
+.site-footer__inner {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr auto;
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-6) 0;
+}
+
+.site-footer__brand {
+  margin: 0;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.site-footer__links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+}
+
+.site-footer__links a {
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  font-weight: 600;
 }
 
 .hero {
@@ -230,8 +468,24 @@ body {
   grid-column: span 4;
 }
 
-#results {
+#results,
+#results-placeholder {
   grid-column: span 8;
+}
+
+.results-placeholder {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  background: linear-gradient(180deg, #fbfcff, #f4f7ff);
+}
+
+.results-placeholder__list {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--color-text-secondary);
+  display: grid;
+  gap: var(--space-1);
 }
 
 .panel {
@@ -964,12 +1218,39 @@ pre {
     padding: var(--space-6);
   }
 
+  .top-nav__inner {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: var(--space-2) 0;
+  }
+
+  .top-nav__links {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .feature-grid,
+  .steps-flow,
+  .pricing-grid,
+  .site-footer__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .site-footer__inner {
+    text-align: center;
+    justify-items: center;
+  }
+
   .content-grid {
     grid-template-columns: 1fr;
   }
 
   #estimator-form,
-  #results {
+  #results,
+  #results-placeholder {
     grid-column: 1 / -1;
   }
 
@@ -1021,6 +1302,23 @@ pre {
 @media (max-width: 640px) {
   body {
     padding: var(--space-4);
+  }
+
+  .app-shell {
+    margin-top: var(--space-6);
+  }
+
+  .top-nav__cta {
+    width: 100%;
+  }
+
+  .top-nav__links {
+    font-size: 0.92rem;
+  }
+
+  .logo-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 
   .hero {

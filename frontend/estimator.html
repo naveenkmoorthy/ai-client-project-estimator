@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Estimator Workspace</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <nav class="top-nav" aria-label="Primary">
+      <div class="container top-nav__inner">
+        <a href="./index.html" class="brand" aria-label="Estimator home">⚡ Estimator Pro</a>
+        <ul class="top-nav__links">
+          <li><a href="./index.html#features">Features</a></li>
+          <li><a href="./index.html#how-it-works">How it works</a></li>
+          <li><a href="./index.html#pricing">Pricing</a></li>
+          <li><a href="./index.html#faq">FAQ</a></li>
+        </ul>
+        <a class="btn btn--secondary top-nav__cta" href="./index.html">Back to overview</a>
+      </div>
+    </nav>
+
+    <main class="container app-shell">
+      <section class="panel estimator-page-intro">
+        <p class="section-kicker">Estimator workspace</p>
+        <h1 class="text-headline">Build a decision-ready delivery draft</h1>
+        <p class="hero-subtitle text-subhead">Enter scope, budget, and timeline to generate milestones, risks, and exportable proposal output.</p>
+      </section>
+
+      <section class="content-grid" aria-label="Estimator workspace">
+        <form id="estimator-form" class="panel">
+          <div id="form-progress" class="form-progress" aria-live="polite">
+            <p class="form-progress__label">Progress: <strong id="progressPercent">0%</strong> complete</p>
+            <ol class="form-progress__sections">
+              <li data-section="scope">Project scope</li>
+              <li data-section="budget">Budget</li>
+              <li data-section="timeline">Timeline</li>
+            </ol>
+          </div>
+
+          <section class="form-group" aria-labelledby="scope-heading">
+            <h2 id="scope-heading" class="form-group__title section-heading">Project scope</h2>
+            <p class="form-group__copy">Share the desired outcome and must-have features so the plan can lock scope faster.</p>
+            <label>
+              Project Description
+              <textarea id="projectDescription" required minlength="10" placeholder="Example: Launch a self-serve customer portal with SSO, billing, and admin reporting."></textarea>
+              <span class="field-hint">Include business goal, must-have features, and key constraints to reduce back-and-forth revisions.</span>
+              <span class="field-error" data-error-for="projectDescription" aria-live="polite"></span>
+            </label>
+          </section>
+
+          <section class="form-group" aria-labelledby="budget-heading">
+            <h2 id="budget-heading" class="form-group__title section-heading">Budget</h2>
+            <p class="form-group__copy">Set investment guardrails so recommendations stay decision-ready for approval.</p>
+            <div class="row">
+              <label>
+                Budget Amount
+                <input id="budgetAmount" type="number" min="0" step="0.01" required />
+                <span class="field-hint">Use the budget ceiling stakeholders can approve today, before contingency.</span>
+                <span class="field-error" data-error-for="budgetAmount" aria-live="polite"></span>
+              </label>
+
+              <label>
+                Currency
+                <input id="budgetCurrency" type="text" minlength="3" maxlength="3" value="USD" required />
+                <span class="field-hint">Use your contracting currency (3-letter ISO code, such as USD or EUR).</span>
+                <span class="field-error" data-error-for="budgetCurrency" aria-live="polite"></span>
+              </label>
+            </div>
+          </section>
+
+          <section class="form-group" aria-labelledby="timeline-heading">
+            <h2 id="timeline-heading" class="form-group__title section-heading">Timeline</h2>
+            <p class="form-group__copy">Set the target decision date so delivery phases align with business priorities.</p>
+            <label>
+              Deadline
+              <input id="deadline" type="date" required />
+              <span class="field-hint">Choose the date you need this live, approved, or presented to stakeholders.</span>
+              <span class="field-error" data-error-for="deadline" aria-live="polite"></span>
+            </label>
+          </section>
+
+          <button type="submit">Generate decision-ready draft</button>
+          <p id="error" class="error" aria-live="polite"></p>
+        </form>
+
+
+        <aside id="results-placeholder" class="panel results-placeholder" aria-live="polite">
+          <h2 class="section-heading">Your delivery snapshot will appear here</h2>
+          <p class="text-body">Complete the form and generate a draft to see budget, milestones, risk flags, and proposal output.</p>
+          <ul class="results-placeholder__list">
+            <li>Budget ask and delivery window</li>
+            <li>Scope breakdown with dependencies</li>
+            <li>Risk watchlist and stakeholder-ready proposal text</li>
+          </ul>
+        </aside>
+
+        <section id="results" class="panel hidden">
+          <div class="results-header">
+            <h2 class="section-heading">Delivery Plan Snapshot</h2>
+            <div class="export-actions" role="group" aria-label="Export proposal actions">
+              <button id="exportPdf" type="button" class="export-btn">Export PDF</button>
+              <button id="exportDocx" type="button" class="export-btn">Export DOCX</button>
+            </div>
+          </div>
+
+          <section class="kpi-summary" aria-label="Estimate overview KPIs">
+            <div class="results-grid">
+              <article class="result-card kpi-tile">
+                <h3 class="section-heading">Budget ask</h3>
+                <p id="kpiTotalCost" class="result-primary-value">N/A</p>
+              </article>
+              <article class="result-card kpi-tile">
+                <h3 class="section-heading">Delivery window</h3>
+                <p id="kpiDuration" class="result-primary-value">N/A</p>
+              </article>
+              <article class="result-card kpi-tile">
+                <h3 class="section-heading">Delivery risk level</h3>
+                <p id="kpiRisk" class="result-primary-value">N/A</p>
+              </article>
+              <article class="result-card kpi-tile">
+                <h3 class="section-heading">Team effort</h3>
+                <p id="kpiEffortHours" class="result-primary-value">N/A</p>
+              </article>
+            </div>
+          </section>
+
+          <p id="primaryRecommendation" class="result-card"></p>
+
+          <div class="results-grid">
+            <article class="result-card result-card--details">
+              <h3>Scope Breakdown</h3>
+              <div id="taskBreakdown" class="result-content result-content--table"></div>
+            </article>
+
+            <article class="result-card result-card--timeline">
+              <h3>Delivery Milestones</h3>
+              <div id="timeline" class="result-content"></div>
+            </article>
+
+            <article class="result-card result-card--cost">
+              <h3>Budget Plan</h3>
+              <div id="costEstimate" class="result-content"></div>
+            </article>
+
+            <article class="result-card result-card--risks">
+              <h3>Risk Watchlist</h3>
+              <div id="riskFlags" class="result-content"></div>
+            </article>
+
+            <article class="result-card result-card--full">
+              <h3>Stakeholder Proposal Draft</h3>
+              <pre id="proposalDraft"></pre>
+            </article>
+          </div>
+
+          <details class="debug-panel" style="opacity: 0.72; margin-top: 1.25rem;">
+            <summary>Developer only: Debug raw JSON</summary>
+            <pre id="rawJson" class="debug-json"></pre>
+          </details>
+        </section>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container site-footer__inner">
+        <div>
+          <p class="site-footer__brand">Estimator Pro</p>
+          <p class="text-helper">Need context first? Visit the product overview page.</p>
+        </div>
+        <ul class="site-footer__links">
+          <li><a href="./index.html#features">Features</a></li>
+          <li><a href="./index.html#pricing">Pricing</a></li>
+          <li><a href="#">Privacy</a></li>
+          <li><a href="#">Terms</a></li>
+        </ul>
+        <a class="btn btn--secondary" href="./index.html">View overview</a>
+      </div>
+    </footer>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
