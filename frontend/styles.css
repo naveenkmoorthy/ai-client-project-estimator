@@ -221,7 +221,7 @@ body {
 
 .integrations-strip {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 .logo-strip {
@@ -230,13 +230,88 @@ body {
   gap: var(--space-2);
 }
 
-.logo-strip span {
-  border: 1px solid var(--color-border-subtle);
+.logo-chip {
+  min-width: 8.75rem;
+  min-height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--color-text-muted) 26%, var(--color-border-subtle));
   border-radius: var(--radius-pill);
-  padding: 0.35rem 0.75rem;
-  color: var(--color-text-secondary);
-  font-weight: 600;
+  padding: 0.35rem 0.85rem;
+  color: var(--color-text-muted);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--color-surface-soft) 94%, white);
+}
+
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.metrics-row p {
+  margin: 0;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
   background: var(--color-surface-soft);
+  padding: 0.75rem;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.metrics-row strong {
+  color: var(--color-primary-700);
+}
+
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.testimonial-card {
+  margin: 0;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  padding: var(--space-3);
+  display: grid;
+  gap: var(--space-3);
+}
+
+.testimonial-card blockquote {
+  margin: 0;
+  color: var(--color-text-primary);
+  position: relative;
+  padding-left: 1rem;
+}
+
+.testimonial-card blockquote::before {
+  content: "\201C";
+  position: absolute;
+  left: 0;
+  top: -0.1rem;
+  font-size: 1.5rem;
+  color: var(--color-primary-600);
+  line-height: 1;
+}
+
+.testimonial-card figcaption {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.testimonial-card__name {
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.testimonial-card__role {
+  font-size: var(--font-size-helper);
+  color: var(--color-text-muted);
 }
 
 .pricing-grid {
@@ -469,6 +544,22 @@ body {
 
 .testimonial-snippet p {
   margin: 0;
+}
+
+.testimonial-snippet blockquote {
+  margin: 0;
+  padding-left: 0.95rem;
+  position: relative;
+}
+
+.testimonial-snippet blockquote::before {
+  content: "\201C";
+  position: absolute;
+  left: 0;
+  top: -0.05rem;
+  font-size: 1.35rem;
+  color: var(--color-primary-600);
+  line-height: 1;
 }
 
 .testimonial-snippet__meta {
@@ -1532,6 +1623,11 @@ pre {
   .logo-strip {
     display: grid;
     grid-template-columns: 1fr 1fr;
+  }
+
+  .testimonial-grid,
+  .metrics-row {
+    grid-template-columns: 1fr;
   }
 
   .pricing-grid {
